@@ -974,6 +974,12 @@ def build():
       flex-wrap: wrap;
     }}
 
+    .split-controls-group {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }}
+
     .workbench-body {{
       flex: 1;
       display: flex;
@@ -981,8 +987,20 @@ def build():
       position: relative;
     }}
 
+    .workbench-body.is-resizing {{
+      user-select: none !important;
+      cursor: col-resize !important;
+    }}
+
+    .workbench-body.is-resizing iframe {{
+      pointer-events: none !important;
+    }}
+
+    .workbench-body.is-resizing .workbench-pane {{
+      transition: none !important;
+    }}
+
     .workbench-pane {{
-      flex: 1;
       height: 100%;
       background: #1e1e24;
       display: flex;
@@ -990,6 +1008,7 @@ def build():
       position: relative;
       overflow: hidden;
       transition: width var(--transition-fast);
+      min-width: 0;
     }}
 
     .workbench-pane iframe {{
@@ -997,31 +1016,77 @@ def build():
       height: 100%;
       border: none;
       background: #2b2b2b;
+      display: block;
     }}
 
     .pane-divider {{
-      width: 6px;
-      background: var(--border-subtle);
+      width: 10px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
       cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 20;
       transition: background var(--transition-fast);
     }}
 
-    .pane-divider:hover {{
-      background: var(--accent-indigo);
+    .pane-divider::after {{
+      content: '';
+      width: 2px;
+      height: 32px;
+      border-radius: 2px;
+      background: var(--text-muted);
+      opacity: 0.6;
+      transition: background var(--transition-fast), height var(--transition-fast);
     }}
 
-    .pane-bar {{
-      height: 38px;
+    .pane-divider:hover,
+    .pane-divider.is-dragging {{
       background: var(--bg-elevated);
-      border-bottom: 1px solid var(--border-subtle);
+    }}
+
+    .pane-divider:hover::after,
+    .pane-divider.is-dragging::after {{
+      background: var(--accent-indigo);
+      opacity: 1;
+      height: 48px;
+    }}
+
+    /* Single vs Split Workbench states */
+    .split-workbench:not(.is-split) #rightPane,
+    .split-workbench:not(.is-split) #paneDivider,
+    .split-workbench:not(.is-split) #rightDocPill,
+    .split-workbench:not(.is-split) #splitControlsGroup,
+    .split-workbench:not(.is-split) #mobileTabSwitcher,
+    .split-workbench:not(.is-split) #mobileFlipBtn {{
+      display: none !important;
+    }}
+
+    .split-workbench:not(.is-split) #leftPane {{
+      width: 100% !important;
+      display: flex !important;
+    }}
+
+    .split-workbench.is-split #rightPane {{
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      gap: 8px;
+    }}
+
+    .split-workbench.is-split #paneDivider {{
+      display: flex;
+    }}
+
+    .split-workbench.is-split #rightDocPill {{
+      display: flex;
+    }}
+
+    .split-workbench.is-split #splitControlsGroup {{
+      display: inline-flex;
     }}
 
     .companion-select {{
@@ -1330,19 +1395,24 @@ def build():
         padding: 8px 12px;
       }}
 
-      .workbench-titles {{
+      .split-workbench.is-split .workbench-titles {{
         display: none;
       }}
 
-      .mobile-tab-switcher {{
+      .split-workbench:not(.is-split) .workbench-titles {{
+        display: flex;
+        max-width: 60vw;
+      }}
+
+      .split-workbench.is-split .mobile-tab-switcher {{
         display: flex;
       }}
 
-      .pane-divider {{
-        display: none;
+      .split-workbench.is-split .pane-divider {{
+        display: none !important;
       }}
 
-      .mobile-flip-btn {{
+      .split-workbench.is-split .mobile-flip-btn {{
         display: block;
       }}
 
@@ -1602,7 +1672,7 @@ def build():
       <div class="workbench-titles">
         <div class="doc-pill left" id="leftDocPill">
           <span>📄</span>
-          <span id="leftDocTitle">Question Paper</span>
+          <span id="leftDocTitle">Document</span>
         </div>
         <div class="doc-pill right" id="rightDocPill">
           <span>🎯</span>
@@ -1616,62 +1686,38 @@ def build():
       </div>
 
       <div class="workbench-controls">
-        <!-- PDF Viewer Engine Switcher -->
-        <select class="select-dropdown" id="viewerEngineSelect" title="PDF Viewer Engine" style="font-size: 11px;">
-          <option value="mozilla">🦊 Mozilla PDF.js</option>
-          <option value="native">🖥️ Native Browser</option>
-        </select>
-
-        <!-- PDF Storage Source Switcher -->
-        <select class="select-dropdown" id="pdfSourceSelect" title="PDF Storage Host" style="font-size: 11px;">
-          <option value="github_raw">GitHub Raw (Official)</option>
-          <option value="jsdelivr">jsDelivr CDN (Accelerated)</option>
-          <option value="local">Local / Same-Origin</option>
-        </select>
+        <!-- Toggle Split View Button (only shown when document has a pair) -->
+        <button class="btn btn-split" id="toggleSplitViewBtn" style="display: none;">⚡ Split View (QP + MS)</button>
 
         <!-- Workbench Mark Complete Toggle -->
         <button class="btn btn-done" id="workbenchMarkDoneBtn">⬜ Mark Complete</button>
 
-        <select class="companion-select" id="companionSelector" title="Switch Right Pane Document">
-          <option value="paired">Paired Solution / Marking Scheme</option>
-          <option value="topper_2025">Topper Answer Script 2025</option>
-          <option value="topper_2024">Topper Answer Script 2024</option>
-          <option value="topper_2023">Topper Answer Script 2023</option>
-          <option value="topper_2022">Topper Answer Script 2022</option>
-        </select>
+        <!-- Split View Controls Group (only visible when in split mode) -->
+        <div class="split-controls-group" id="splitControlsGroup">
+          <select class="companion-select" id="companionSelector" title="Switch Right Pane Document">
+          </select>
+          <button class="btn btn-secondary" id="swapPanesBtn" title="Swap Left and Right Panes">⇄ Swap</button>
+          <button class="btn btn-secondary" id="splitPreset50" title="50/50 Split View">50 / 50</button>
+          <button class="btn btn-secondary" id="splitPresetLeft" title="Focus Left Pane (70/30)">Left</button>
+          <button class="btn btn-secondary" id="splitPresetRight" title="Focus Right Pane (30/70)">Right</button>
+        </div>
 
-        <button class="btn btn-secondary" id="swapPanesBtn" title="Swap Left and Right Panes">⇄ Swap</button>
-        <button class="btn btn-secondary" id="splitPreset50" title="50/50 Split View">50 / 50</button>
-        <button class="btn btn-secondary" id="splitPresetLeft" title="Focus Left Pane">Left</button>
-        <button class="btn btn-secondary" id="splitPresetRight" title="Focus Right Pane">Right</button>
         <button class="btn btn-secondary" id="popoutBtn" title="Open in browser tab">↗ Pop Out</button>
-        <button class="btn btn-primary" id="closeWorkbenchBtn" title="Close Split Workbench (ESC)">✕ Close</button>
+        <button class="btn btn-primary" id="closeWorkbenchBtn" title="Close Viewer (ESC)">✕ Close</button>
       </div>
     </div>
 
-    <!-- Mobile Quick Flip Floating Button -->
+    <!-- Mobile Quick Flip Floating Button (only shown in split mode on mobile) -->
     <button class="mobile-flip-btn" id="mobileFlipBtn">⚡ Switch to Solution ➔</button>
 
     <div class="workbench-body" id="workbenchBody">
       <div class="workbench-pane" id="leftPane">
-        <div class="pane-bar">
-          <span id="leftPaneLabel">Primary Document</span>
-          <div style="display: flex; gap: 6px;">
-            <a href="#" id="leftDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
-          </div>
-        </div>
         <iframe id="leftIframe" src="about:blank" allow="fullscreen"></iframe>
       </div>
 
       <div class="pane-divider" id="paneDivider"></div>
 
       <div class="workbench-pane" id="rightPane">
-        <div class="pane-bar">
-          <span id="rightPaneLabel">Solution / Marking Scheme</span>
-          <div style="display: flex; gap: 6px;">
-            <a href="#" id="rightDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
-          </div>
-        </div>
         <iframe id="rightIframe" src="about:blank" allow="fullscreen"></iframe>
       </div>
     </div>
@@ -1737,14 +1783,10 @@ def build():
         // Completed Document Tracking (localStorage)
         completedDocs: new Set(JSON.parse(localStorage.getItem('cbse_completed_docs') || '[]')),
 
-        // Viewer & Storage Config
-        viewerEngine: localStorage.getItem('cbse_viewer_engine') || 'mozilla', // 'mozilla' or 'native'
-        pdfSource: localStorage.getItem('cbse_pdf_source') || 'github_raw', // 'github_raw', 'jsdelivr', 'local'
-
         // Workbench state
         activeLeftItem: null,
         activeRightItem: null,
-        splitMode: '50-50',
+        splitPercent: parseFloat(localStorage.getItem('cbse_split_percent')) || 50,
         activeMobileTab: 'left'
       }};
 
@@ -1800,26 +1842,29 @@ def build():
         
         // Workbench
         splitWorkbench: document.getElementById('splitWorkbench'),
+        workbenchBody: document.getElementById('workbenchBody'),
         closeWorkbenchBtn: document.getElementById('closeWorkbenchBtn'),
         leftDocTitle: document.getElementById('leftDocTitle'),
         rightDocTitle: document.getElementById('rightDocTitle'),
+        leftDocPill: document.getElementById('leftDocPill'),
+        rightDocPill: document.getElementById('rightDocPill'),
         leftIframe: document.getElementById('leftIframe'),
         rightIframe: document.getElementById('rightIframe'),
-        leftDownloadLink: document.getElementById('leftDownloadLink'),
-        rightDownloadLink: document.getElementById('rightDownloadLink'),
+        paneDivider: document.getElementById('paneDivider'),
         swapPanesBtn: document.getElementById('swapPanesBtn'),
         splitPreset50: document.getElementById('splitPreset50'),
         splitPresetLeft: document.getElementById('splitPresetLeft'),
         splitPresetRight: document.getElementById('splitPresetRight'),
         popoutBtn: document.getElementById('popoutBtn'),
         companionSelector: document.getElementById('companionSelector'),
-        viewerEngineSelect: document.getElementById('viewerEngineSelect'),
-        pdfSourceSelect: document.getElementById('pdfSourceSelect'),
+        splitControlsGroup: document.getElementById('splitControlsGroup'),
+        toggleSplitViewBtn: document.getElementById('toggleSplitViewBtn'),
         workbenchMarkDoneBtn: document.getElementById('workbenchMarkDoneBtn'),
         leftPane: document.getElementById('leftPane'),
         rightPane: document.getElementById('rightPane'),
 
         // Mobile Workbench Tabs
+        mobileTabSwitcher: document.getElementById('mobileTabSwitcher'),
         mobileTabLeft: document.getElementById('mobileTabLeft'),
         mobileTabRight: document.getElementById('mobileTabRight'),
         mobileFlipBtn: document.getElementById('mobileFlipBtn'),
@@ -1865,14 +1910,14 @@ def build():
 
         if (dom.splitWorkbench.classList.contains('active') && state.activeLeftItem) {{
           params.set('doc', state.activeLeftItem.id);
-          if (state.activeRightItem) {{
+          if (dom.splitWorkbench.classList.contains('is-split') && state.activeRightItem) {{
             params.set('right', state.activeRightItem.id);
-          }}
-          if (state.splitMode && state.splitMode !== '50-50') {{
-            params.set('split', state.splitMode);
-          }}
-          if (state.activeMobileTab && state.activeMobileTab !== 'left') {{
-            params.set('tab', state.activeMobileTab);
+            if (state.splitPercent) {{
+              params.set('split', Math.round(state.splitPercent).toString());
+            }}
+            if (state.activeMobileTab && state.activeMobileTab !== 'left') {{
+              params.set('tab', state.activeMobileTab);
+            }}
           }}
         }}
 
@@ -1964,9 +2009,9 @@ def build():
         }}
 
         if (urlParams.has('split')) {{
-          state.splitMode = urlParams.get('split');
-        }} else if (localStorage.getItem('cbse_split_mode')) {{
-          state.splitMode = localStorage.getItem('cbse_split_mode');
+          state.splitPercent = parseFloat(urlParams.get('split'));
+        }} else if (localStorage.getItem('cbse_split_percent')) {{
+          state.splitPercent = parseFloat(localStorage.getItem('cbse_split_percent'));
         }}
 
         if (urlParams.has('tab')) {{
@@ -2018,8 +2063,13 @@ def build():
         const targetDocId = docIdFromUrl || docIdFromStorage;
 
         if (targetDocId) {{
-          const rightId = urlParams.get('right') || localStorage.getItem('cbse_active_right_id');
-          const isSplit = !!rightId || urlParams.get('split') !== null;
+          const rightId = urlParams.get('right') || (localStorage.getItem('cbse_is_split') === 'true' ? localStorage.getItem('cbse_active_right_id') : null);
+          const isSplit = !!rightId;
+          if (urlParams.get('split')) {{
+            state.splitPercent = parseFloat(urlParams.get('split'));
+          }} else if (localStorage.getItem('cbse_split_percent')) {{
+            state.splitPercent = parseFloat(localStorage.getItem('cbse_split_percent'));
+          }}
           openWorkbench(targetDocId, isSplit, false, rightId);
           return;
         }}
@@ -2059,52 +2109,14 @@ def build():
         dom.studyStatusFilter.options[2].textContent = `Status: ✅ Completed (${{completedCount}})`;
       }}
 
-      // PDF URL Resolver for Mozilla PDF.js & Storage
+      // PDF URL Resolver (Always official GitHub Raw via Mozilla PDF.js viewer)
       function getRawPdfUrl(relPath) {{
-        if (state.pdfSource === 'github_raw') {{
-          return `https://raw.githubusercontent.com/${{GITHUB_USER}}/${{GITHUB_REPO}}/${{GITHUB_BRANCH}}/${{encodeURI(relPath)}}`;
-        }} else if (state.pdfSource === 'jsdelivr') {{
-          return `https://cdn.jsdelivr.net/gh/${{GITHUB_USER}}/${{GITHUB_REPO}}@${{GITHUB_BRANCH}}/${{encodeURI(relPath)}}`;
-        }} else {{
-          // Local server / current origin
-          return window.location.origin + '/' + encodeURI(relPath);
-        }}
+        return `https://raw.githubusercontent.com/${{GITHUB_USER}}/${{GITHUB_REPO}}/${{GITHUB_BRANCH}}/${{encodeURI(relPath)}}`;
       }}
 
       function buildViewerUrl(relPath) {{
         const rawUrl = getRawPdfUrl(relPath);
-        if (state.viewerEngine === 'native') {{
-          return rawUrl;
-        }}
-        // Mozilla PDF.js hosted viewer
         return `${{MOZILLA_VIEWER_BASE}}?file=${{encodeURIComponent(rawUrl)}}`;
-      }}
-
-      // Sync settings dropdowns
-      dom.viewerEngineSelect.value = state.viewerEngine;
-      dom.pdfSourceSelect.value = state.pdfSource;
-
-      dom.viewerEngineSelect.addEventListener('change', (e) => {{
-        state.viewerEngine = e.target.value;
-        localStorage.setItem('cbse_viewer_engine', state.viewerEngine);
-        reloadWorkbenchIframes();
-      }});
-
-      dom.pdfSourceSelect.addEventListener('change', (e) => {{
-        state.pdfSource = e.target.value;
-        localStorage.setItem('cbse_pdf_source', state.pdfSource);
-        reloadWorkbenchIframes();
-      }});
-
-      function reloadWorkbenchIframes() {{
-        if (state.activeLeftItem) {{
-          dom.leftIframe.src = buildViewerUrl(state.activeLeftItem.rel_path);
-          dom.leftDownloadLink.href = getRawPdfUrl(state.activeLeftItem.rel_path);
-        }}
-        if (state.activeRightItem) {{
-          dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
-          dom.rightDownloadLink.href = getRawPdfUrl(state.activeRightItem.rel_path);
-        }}
       }}
 
       // Theme toggle
@@ -2377,6 +2389,13 @@ def build():
         }}
       }});
 
+      function applySplitPercent(pct) {{
+        pct = Math.max(15, Math.min(85, pct));
+        state.splitPercent = pct;
+        dom.leftPane.style.width = pct.toFixed(2) + '%';
+        dom.rightPane.style.width = (100 - pct).toFixed(2) + '%';
+      }}
+
       function openWorkbench(itemId, isSplit, pushHistory = true, rightItemId = null) {{
         const primary = state.allMaterials.find(m => m.id === itemId);
         if (!primary) return;
@@ -2384,50 +2403,61 @@ def build():
         state.activeLeftItem = primary;
         dom.leftDocTitle.textContent = primary.title;
         dom.leftIframe.src = buildViewerUrl(primary.rel_path);
-        dom.leftDownloadLink.href = getRawPdfUrl(primary.rel_path);
 
         updateWorkbenchDoneBtn();
-        populateCompanionDropdown(primary);
 
+        const hasPair = !!primary.paired_id;
         const isMobile = window.innerWidth <= 640;
 
+        let shouldSplit = false;
         if (rightItemId) {{
           const specifiedRight = state.allMaterials.find(m => m.id === rightItemId);
           if (specifiedRight) {{
             state.activeRightItem = specifiedRight;
-            dom.rightDocTitle.textContent = specifiedRight.title;
-            dom.rightIframe.src = buildViewerUrl(specifiedRight.rel_path);
-            dom.rightDownloadLink.href = getRawPdfUrl(specifiedRight.rel_path);
-            dom.companionSelector.value = specifiedRight.id;
+            shouldSplit = true;
           }}
-        }} else if (isSplit && primary.paired_id) {{
+        }} else if (isSplit && hasPair) {{
           const paired = state.allMaterials.find(m => m.id === primary.paired_id);
           if (paired) {{
             state.activeRightItem = paired;
-            dom.rightDocTitle.textContent = paired.title;
-            dom.rightIframe.src = buildViewerUrl(paired.rel_path);
-            dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
-            dom.companionSelector.value = paired.id;
+            shouldSplit = true;
           }}
-        }} else if (primary.paired_id) {{
-          const paired = state.allMaterials.find(m => m.id === primary.paired_id);
-          state.activeRightItem = paired;
-          dom.rightDocTitle.textContent = paired.title;
-          dom.rightIframe.src = buildViewerUrl(paired.rel_path);
-          dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
-          dom.companionSelector.value = paired.id;
-        }} else {{
-          state.activeRightItem = null;
         }}
 
-        if (isMobile) {{
-          switchMobileTab(state.activeMobileTab || 'left');
+        if (hasPair) {{
+          dom.toggleSplitViewBtn.style.display = 'inline-flex';
+          populateCompanionDropdown(primary);
         }} else {{
-          if (state.activeRightItem) {{
-            setSplitPreset(state.splitMode || '50-50');
+          dom.toggleSplitViewBtn.style.display = 'none';
+        }}
+
+        if (shouldSplit && state.activeRightItem) {{
+          // Dual-Pane Split Mode
+          dom.splitWorkbench.classList.add('is-split');
+          dom.toggleSplitViewBtn.textContent = '🗖 Single View';
+          dom.toggleSplitViewBtn.className = 'btn btn-secondary';
+
+          dom.rightDocTitle.textContent = state.activeRightItem.title;
+          dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
+          if (dom.companionSelector) dom.companionSelector.value = state.activeRightItem.id;
+
+          if (isMobile) {{
+            switchMobileTab(state.activeMobileTab || 'left');
           }} else {{
-            setSplitPreset('left-focus');
+            const savedPct = parseFloat(localStorage.getItem('cbse_split_percent')) || 50;
+            applySplitPercent(savedPct);
           }}
+        }} else {{
+          // Single View Mode (100% full width, no division)
+          state.activeRightItem = null;
+          dom.splitWorkbench.classList.remove('is-split');
+          if (hasPair) {{
+            dom.toggleSplitViewBtn.textContent = '⚡ Split View (QP + MS)';
+            dom.toggleSplitViewBtn.className = 'btn btn-split';
+          }}
+          dom.rightIframe.src = 'about:blank';
+          dom.leftPane.style.width = '100%';
+          dom.rightPane.style.width = '0%';
         }}
 
         dom.splitWorkbench.classList.add('active');
@@ -2441,8 +2471,7 @@ def build():
         }} else {{
           localStorage.removeItem('cbse_active_right_id');
         }}
-        localStorage.setItem('cbse_split_mode', state.splitMode);
-        localStorage.setItem('cbse_active_mobile_tab', state.activeMobileTab);
+        localStorage.setItem('cbse_is_split', shouldSplit ? 'true' : 'false');
 
         // Synchronize URL
         updateUrl(pushHistory);
@@ -2521,16 +2550,22 @@ def build():
           state.activeRightItem = targetDoc;
           dom.rightDocTitle.textContent = targetDoc.title;
           dom.rightIframe.src = buildViewerUrl(targetDoc.rel_path);
-          dom.rightDownloadLink.href = getRawPdfUrl(targetDoc.rel_path);
           localStorage.setItem('cbse_active_right_id', targetDoc.id);
           updateUrl(false);
           if (window.innerWidth <= 640) switchMobileTab('right');
-          else setSplitPreset('50-50');
+          else applySplitPercent(state.splitPercent || 50);
         }}
+      }});
+
+      dom.toggleSplitViewBtn.addEventListener('click', () => {{
+        if (!state.activeLeftItem || !state.activeLeftItem.paired_id) return;
+        const currentlySplit = dom.splitWorkbench.classList.contains('is-split');
+        openWorkbench(state.activeLeftItem.id, !currentlySplit, false);
       }});
 
       function closeWorkbench(updateHistory = true) {{
         dom.splitWorkbench.classList.remove('active');
+        dom.splitWorkbench.classList.remove('is-split');
         dom.leftIframe.src = 'about:blank';
         dom.rightIframe.src = 'about:blank';
         document.body.style.overflow = '';
@@ -2541,6 +2576,7 @@ def build():
         localStorage.setItem('cbse_workbench_open', 'false');
         localStorage.removeItem('cbse_active_doc_id');
         localStorage.removeItem('cbse_active_right_id');
+        localStorage.removeItem('cbse_is_split');
 
         if (updateHistory) {{
           updateUrl(false);
@@ -2549,31 +2585,23 @@ def build():
 
       dom.closeWorkbenchBtn.addEventListener('click', () => closeWorkbench(true));
 
-      function setSplitPreset(preset) {{
-        state.splitMode = preset;
-        localStorage.setItem('cbse_split_mode', preset);
+      dom.splitPreset50.addEventListener('click', () => {{
+        applySplitPercent(50);
+        localStorage.setItem('cbse_split_percent', '50');
         updateUrl(false);
-        if (preset === '50-50') {{
-          dom.leftPane.style.width = '50%';
-          dom.rightPane.style.width = '50%';
-          dom.rightPane.style.display = 'flex';
-          dom.leftPane.style.display = 'flex';
-        }} else if (preset === 'left-focus') {{
-          dom.leftPane.style.width = '100%';
-          dom.rightPane.style.width = '0%';
-          dom.rightPane.style.display = 'none';
-          dom.leftPane.style.display = 'flex';
-        }} else if (preset === 'right-focus') {{
-          dom.leftPane.style.width = '0%';
-          dom.rightPane.style.width = '100%';
-          dom.leftPane.style.display = 'none';
-          dom.rightPane.style.display = 'flex';
-        }}
-      }}
+      }});
 
-      dom.splitPreset50.addEventListener('click', () => setSplitPreset('50-50'));
-      dom.splitPresetLeft.addEventListener('click', () => setSplitPreset('left-focus'));
-      dom.splitPresetRight.addEventListener('click', () => setSplitPreset('right-focus'));
+      dom.splitPresetLeft.addEventListener('click', () => {{
+        applySplitPercent(70);
+        localStorage.setItem('cbse_split_percent', '70');
+        updateUrl(false);
+      }});
+
+      dom.splitPresetRight.addEventListener('click', () => {{
+        applySplitPercent(30);
+        localStorage.setItem('cbse_split_percent', '30');
+        updateUrl(false);
+      }});
 
       dom.swapPanesBtn.addEventListener('click', () => {{
         if (!state.activeLeftItem || !state.activeRightItem) return;
@@ -2583,11 +2611,9 @@ def build():
 
         dom.leftDocTitle.textContent = state.activeLeftItem.title;
         dom.leftIframe.src = buildViewerUrl(state.activeLeftItem.rel_path);
-        dom.leftDownloadLink.href = getRawPdfUrl(state.activeLeftItem.rel_path);
 
         dom.rightDocTitle.textContent = state.activeRightItem.title;
         dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
-        dom.rightDownloadLink.href = getRawPdfUrl(state.activeRightItem.rel_path);
 
         localStorage.setItem('cbse_active_doc_id', state.activeLeftItem.id);
         localStorage.setItem('cbse_active_right_id', state.activeRightItem.id);
@@ -2596,9 +2622,53 @@ def build():
         updateWorkbenchDoneBtn();
       }});
 
+      // Draggable Split Divider Resizing
+      let isDraggingDivider = false;
+
+      function onDividerPointerDown(e) {{
+        if (!state.activeRightItem || !dom.splitWorkbench.classList.contains('is-split')) return;
+        isDraggingDivider = true;
+        dom.paneDivider.classList.add('is-dragging');
+        dom.workbenchBody.classList.add('is-resizing');
+        try {{
+          dom.paneDivider.setPointerCapture(e.pointerId);
+        }} catch (err) {{}}
+        e.preventDefault();
+      }}
+
+      function onDividerPointerMove(e) {{
+        if (!isDraggingDivider) return;
+        const rect = dom.workbenchBody.getBoundingClientRect();
+        if (rect.width <= 0) return;
+        const offsetPx = e.clientX - rect.left;
+        let pct = (offsetPx / rect.width) * 100;
+        applySplitPercent(pct);
+      }}
+
+      function onDividerPointerUp(e) {{
+        if (!isDraggingDivider) return;
+        isDraggingDivider = false;
+        dom.paneDivider.classList.remove('is-dragging');
+        dom.workbenchBody.classList.remove('is-resizing');
+        try {{
+          dom.paneDivider.releasePointerCapture(e.pointerId);
+        }} catch (err) {{}}
+        if (state.splitPercent) {{
+          localStorage.setItem('cbse_split_percent', state.splitPercent.toFixed(1));
+          updateUrl(false);
+        }}
+      }}
+
+      dom.paneDivider.addEventListener('pointerdown', onDividerPointerDown);
+      dom.paneDivider.addEventListener('pointermove', onDividerPointerMove);
+      dom.paneDivider.addEventListener('pointerup', onDividerPointerUp);
+      dom.paneDivider.addEventListener('pointercancel', onDividerPointerUp);
+
       dom.popoutBtn.addEventListener('click', () => {{
         if (state.activeLeftItem) window.open(buildViewerUrl(state.activeLeftItem.rel_path), '_blank');
-        if (state.activeRightItem) window.open(buildViewerUrl(state.activeRightItem.rel_path), '_blank');
+        if (state.activeRightItem && dom.splitWorkbench.classList.contains('is-split')) {{
+          window.open(buildViewerUrl(state.activeRightItem.rel_path), '_blank');
+        }}
       }});
 
       // Omni-Search
@@ -2841,10 +2911,10 @@ def build():
         const docId = params.get('doc');
         if (docId) {{
           const rightId = params.get('right');
-          const isSplit = !!rightId || params.get('split') !== null;
-          if (params.get('split')) state.splitMode = params.get('split');
+          const isSplit = !!rightId;
+          if (params.get('split')) state.splitPercent = parseFloat(params.get('split'));
           if (params.get('tab')) state.activeMobileTab = params.get('tab');
-          if (!dom.splitWorkbench.classList.contains('active') || !state.activeLeftItem || state.activeLeftItem.id !== docId) {{
+          if (!dom.splitWorkbench.classList.contains('active') || !state.activeLeftItem || state.activeLeftItem.id !== docId || dom.splitWorkbench.classList.contains('is-split') !== isSplit) {{
             openWorkbench(docId, isSplit, false, rightId);
           }}
         }} else {{
