@@ -1809,6 +1809,196 @@
         mapContentArea: document.getElementById('mapContentArea')
       };
 
+      // ============================================================
+      // NAVIGATION & URL STATE SYNCHRONIZATION
+      // ============================================================
+      function getUrlParams() {
+        let search = window.location.search;
+        if (!search && window.location.hash) {
+          const h = window.location.hash.slice(1);
+          search = h.includes('?') ? h.slice(h.indexOf('?')) : (h.includes('=') ? '?' + h : '');
+        }
+        return new URLSearchParams(search || '');
+      }
+
+      function updateUrl(push = false) {
+        const params = new URLSearchParams();
+        if (state.selectedSubject && state.selectedSubject !== 'All') params.set('subject', state.selectedSubject);
+        if (state.selectedCategory && state.selectedCategory !== 'All') params.set('category', state.selectedCategory);
+        if (state.selectedYear && state.selectedYear !== 'All') params.set('year', state.selectedYear);
+        if (state.selectedType && state.selectedType !== 'All') params.set('type', state.selectedType);
+        if (state.selectedStudyStatus && state.selectedStudyStatus !== 'all') params.set('status', state.selectedStudyStatus);
+        if (state.sortBy && state.sortBy !== 'year_desc') params.set('sort', state.sortBy);
+        if (state.pairedOnly) params.set('paired', '1');
+        if (state.viewMode && state.viewMode !== 'grid') params.set('view', state.viewMode);
+        if (state.searchQuery) params.set('q', state.searchQuery);
+
+        if (dom.splitWorkbench.classList.contains('active') && state.activeLeftItem) {
+          params.set('doc', state.activeLeftItem.id);
+          if (state.activeRightItem) {
+            params.set('right', state.activeRightItem.id);
+          }
+          if (state.splitMode && state.splitMode !== '50-50') {
+            params.set('split', state.splitMode);
+          }
+          if (state.activeMobileTab && state.activeMobileTab !== 'left') {
+            params.set('tab', state.activeMobileTab);
+          }
+        }
+
+        if (dom.mapModal.classList.contains('active')) {
+          params.set('map', '1');
+        }
+
+        const qs = params.toString();
+        const newUrl = qs ? (window.location.pathname + '?' + qs) : window.location.pathname;
+
+        try {
+          if (window.location.protocol.startsWith('http')) {
+            if (push) {
+              window.history.pushState({ ...state }, '', newUrl);
+            } else {
+              window.history.replaceState({ ...state }, '', newUrl);
+            }
+          } else {
+            const hashVal = qs ? '#' + qs : '';
+            if (window.location.hash !== hashVal) {
+              if (push) window.location.hash = hashVal;
+              else window.location.replace(window.location.pathname + hashVal);
+            }
+          }
+        } catch (e) {
+          try {
+            const hashVal = qs ? '#' + qs : '';
+            if (window.location.hash !== hashVal) {
+              window.location.hash = hashVal;
+            }
+          } catch (err) {}
+        }
+      }
+
+      function initNavigationAndState() {
+        const urlParams = getUrlParams();
+        const hasUrlParams = Array.from(urlParams.keys()).length > 0;
+
+        if (urlParams.has('subject')) {
+          state.selectedSubject = urlParams.get('subject');
+        } else if (localStorage.getItem('cbse_subject')) {
+          state.selectedSubject = localStorage.getItem('cbse_subject');
+        }
+
+        if (urlParams.has('category')) {
+          state.selectedCategory = urlParams.get('category');
+        } else if (localStorage.getItem('cbse_category')) {
+          state.selectedCategory = localStorage.getItem('cbse_category');
+        }
+
+        if (urlParams.has('year')) {
+          state.selectedYear = urlParams.get('year');
+        } else if (localStorage.getItem('cbse_year')) {
+          state.selectedYear = localStorage.getItem('cbse_year');
+        }
+
+        if (urlParams.has('type')) {
+          state.selectedType = urlParams.get('type');
+        } else if (localStorage.getItem('cbse_type')) {
+          state.selectedType = localStorage.getItem('cbse_type');
+        }
+
+        if (urlParams.has('status')) {
+          state.selectedStudyStatus = urlParams.get('status');
+        } else if (localStorage.getItem('cbse_study_status')) {
+          state.selectedStudyStatus = localStorage.getItem('cbse_study_status');
+        }
+
+        if (urlParams.has('sort')) {
+          state.sortBy = urlParams.get('sort');
+        } else if (localStorage.getItem('cbse_sort_by')) {
+          state.sortBy = localStorage.getItem('cbse_sort_by');
+        }
+
+        if (urlParams.has('paired')) {
+          state.pairedOnly = urlParams.get('paired') === '1' || urlParams.get('paired') === 'true';
+        } else if (localStorage.getItem('cbse_paired_only') !== null) {
+          state.pairedOnly = localStorage.getItem('cbse_paired_only') === 'true';
+        }
+
+        if (urlParams.has('view')) {
+          state.viewMode = urlParams.get('view');
+        } else if (localStorage.getItem('cbse_view_mode')) {
+          state.viewMode = localStorage.getItem('cbse_view_mode');
+        }
+
+        if (urlParams.has('q')) {
+          state.searchQuery = urlParams.get('q');
+        }
+
+        if (urlParams.has('split')) {
+          state.splitMode = urlParams.get('split');
+        } else if (localStorage.getItem('cbse_split_mode')) {
+          state.splitMode = localStorage.getItem('cbse_split_mode');
+        }
+
+        if (urlParams.has('tab')) {
+          state.activeMobileTab = urlParams.get('tab');
+        } else if (localStorage.getItem('cbse_active_mobile_tab')) {
+          state.activeMobileTab = localStorage.getItem('cbse_active_mobile_tab');
+        }
+      }
+
+      function syncFilterControls() {
+        if (dom.studyStatusFilter) dom.studyStatusFilter.value = state.selectedStudyStatus;
+        if (dom.sortSelect) dom.sortSelect.value = state.sortBy;
+        if (dom.pairedOnlyToggle) dom.pairedOnlyToggle.checked = state.pairedOnly;
+        if (dom.viewModeIcon) dom.viewModeIcon.textContent = state.viewMode === 'grid' ? '⊞' : '☰';
+
+        document.querySelectorAll('.subject-pill').forEach(pill => {
+          if (pill.getAttribute('data-subject') === state.selectedSubject) {
+            pill.classList.add('active');
+            try { pill.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (e) {}
+          } else {
+            pill.classList.remove('active');
+          }
+        });
+
+        dom.yearChipGroup.querySelectorAll('.chip').forEach(chip => {
+          if (chip.getAttribute('data-year') === state.selectedYear) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        });
+
+        dom.typeChipGroup.querySelectorAll('.chip').forEach(chip => {
+          if (chip.getAttribute('data-type') === state.selectedType) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        });
+      }
+
+      function restoreOpenDocuments() {
+        const urlParams = getUrlParams();
+        const docIdFromUrl = urlParams.get('doc');
+        const docIdFromStorage = localStorage.getItem('cbse_workbench_open') === 'true' 
+          ? localStorage.getItem('cbse_active_doc_id') 
+          : null;
+
+        const targetDocId = docIdFromUrl || docIdFromStorage;
+
+        if (targetDocId) {
+          const rightId = urlParams.get('right') || localStorage.getItem('cbse_active_right_id');
+          const isSplit = !!rightId || urlParams.get('split') !== null;
+          openWorkbench(targetDocId, isSplit, false, rightId);
+          return;
+        }
+
+        if (urlParams.get('map') === '1' || localStorage.getItem('cbse_map_open') === 'true') {
+          openMapModal(false);
+        }
+      }
+
       // Save & Update Completed Documents
       function saveCompletedDocs() {
         localStorage.setItem('cbse_completed_docs', JSON.stringify(Array.from(state.completedDocs)));
@@ -1945,6 +2135,8 @@
           `;
           div.addEventListener('click', () => {
             state.selectedCategory = cat.id;
+            localStorage.setItem('cbse_category', state.selectedCategory);
+            updateUrl(false);
             renderCategoryNav();
             renderMaterials();
             if (window.innerWidth <= 900) closeDrawer();
@@ -2119,14 +2311,14 @@
         document.querySelectorAll('.open-split-btn').forEach(b => {
           b.addEventListener('click', (e) => {
             const id = e.currentTarget.getAttribute('data-id');
-            openWorkbench(id, true);
+            openWorkbench(id, true, true);
           });
         });
 
         document.querySelectorAll('.open-single-btn').forEach(b => {
           b.addEventListener('click', (e) => {
             const id = e.currentTarget.getAttribute('data-id');
-            openWorkbench(id, false);
+            openWorkbench(id, false, true);
           });
         });
 
@@ -2155,7 +2347,7 @@
         }
       });
 
-      function openWorkbench(itemId, isSplit) {
+      function openWorkbench(itemId, isSplit, pushHistory = true, rightItemId = null) {
         const primary = state.allMaterials.find(m => m.id === itemId);
         if (!primary) return;
 
@@ -2169,39 +2361,67 @@
 
         const isMobile = window.innerWidth <= 640;
 
-        if (isSplit && primary.paired_id) {
+        if (rightItemId) {
+          const specifiedRight = state.allMaterials.find(m => m.id === rightItemId);
+          if (specifiedRight) {
+            state.activeRightItem = specifiedRight;
+            dom.rightDocTitle.textContent = specifiedRight.title;
+            dom.rightIframe.src = buildViewerUrl(specifiedRight.rel_path);
+            dom.rightDownloadLink.href = getRawPdfUrl(specifiedRight.rel_path);
+            dom.companionSelector.value = specifiedRight.id;
+          }
+        } else if (isSplit && primary.paired_id) {
           const paired = state.allMaterials.find(m => m.id === primary.paired_id);
           if (paired) {
             state.activeRightItem = paired;
             dom.rightDocTitle.textContent = paired.title;
             dom.rightIframe.src = buildViewerUrl(paired.rel_path);
             dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
-            
-            if (isMobile) switchMobileTab('left');
-            else setSplitPreset('50-50');
+            dom.companionSelector.value = paired.id;
           }
+        } else if (primary.paired_id) {
+          const paired = state.allMaterials.find(m => m.id === primary.paired_id);
+          state.activeRightItem = paired;
+          dom.rightDocTitle.textContent = paired.title;
+          dom.rightIframe.src = buildViewerUrl(paired.rel_path);
+          dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
+          dom.companionSelector.value = paired.id;
         } else {
-          if (primary.paired_id) {
-            const paired = state.allMaterials.find(m => m.id === primary.paired_id);
-            state.activeRightItem = paired;
-            dom.rightDocTitle.textContent = paired.title;
-            dom.rightIframe.src = buildViewerUrl(paired.rel_path);
-            dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
-            if (isMobile) switchMobileTab('left');
-            else setSplitPreset('50-50');
+          state.activeRightItem = null;
+        }
+
+        if (isMobile) {
+          switchMobileTab(state.activeMobileTab || 'left');
+        } else {
+          if (state.activeRightItem) {
+            setSplitPreset(state.splitMode || '50-50');
           } else {
-            state.activeRightItem = null;
-            if (isMobile) switchMobileTab('left');
-            else setSplitPreset('left-focus');
+            setSplitPreset('left-focus');
           }
         }
 
         dom.splitWorkbench.classList.add('active');
         document.body.style.overflow = 'hidden';
+
+        // Persist to localStorage
+        localStorage.setItem('cbse_workbench_open', 'true');
+        localStorage.setItem('cbse_active_doc_id', primary.id);
+        if (state.activeRightItem) {
+          localStorage.setItem('cbse_active_right_id', state.activeRightItem.id);
+        } else {
+          localStorage.removeItem('cbse_active_right_id');
+        }
+        localStorage.setItem('cbse_split_mode', state.splitMode);
+        localStorage.setItem('cbse_active_mobile_tab', state.activeMobileTab);
+
+        // Synchronize URL
+        updateUrl(pushHistory);
       }
 
       function switchMobileTab(tab) {
         state.activeMobileTab = tab;
+        localStorage.setItem('cbse_active_mobile_tab', tab);
+        updateUrl(false);
         if (tab === 'left') {
           dom.mobileTabLeft.classList.add('active');
           dom.mobileTabRight.classList.remove('active');
@@ -2272,22 +2492,37 @@
           dom.rightDocTitle.textContent = targetDoc.title;
           dom.rightIframe.src = buildViewerUrl(targetDoc.rel_path);
           dom.rightDownloadLink.href = getRawPdfUrl(targetDoc.rel_path);
+          localStorage.setItem('cbse_active_right_id', targetDoc.id);
+          updateUrl(false);
           if (window.innerWidth <= 640) switchMobileTab('right');
           else setSplitPreset('50-50');
         }
       });
 
-      function closeWorkbench() {
+      function closeWorkbench(updateHistory = true) {
         dom.splitWorkbench.classList.remove('active');
         dom.leftIframe.src = 'about:blank';
         dom.rightIframe.src = 'about:blank';
         document.body.style.overflow = '';
+
+        state.activeLeftItem = null;
+        state.activeRightItem = null;
+
+        localStorage.setItem('cbse_workbench_open', 'false');
+        localStorage.removeItem('cbse_active_doc_id');
+        localStorage.removeItem('cbse_active_right_id');
+
+        if (updateHistory) {
+          updateUrl(false);
+        }
       }
 
-      dom.closeWorkbenchBtn.addEventListener('click', closeWorkbench);
+      dom.closeWorkbenchBtn.addEventListener('click', () => closeWorkbench(true));
 
       function setSplitPreset(preset) {
         state.splitMode = preset;
+        localStorage.setItem('cbse_split_mode', preset);
+        updateUrl(false);
         if (preset === '50-50') {
           dom.leftPane.style.width = '50%';
           dom.rightPane.style.width = '50%';
@@ -2323,6 +2558,10 @@
         dom.rightDocTitle.textContent = state.activeRightItem.title;
         dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
         dom.rightDownloadLink.href = getRawPdfUrl(state.activeRightItem.rel_path);
+
+        localStorage.setItem('cbse_active_doc_id', state.activeLeftItem.id);
+        localStorage.setItem('cbse_active_right_id', state.activeRightItem.id);
+        updateUrl(false);
 
         updateWorkbenchDoneBtn();
       });
@@ -2384,7 +2623,7 @@
           `;
           item.addEventListener('click', () => {
             closeOmniSearch();
-            openWorkbench(m.id, !!m.paired_id);
+            openWorkbench(m.id, !!m.paired_id, true);
           });
           dom.searchResultsList.appendChild(item);
         });
@@ -2402,8 +2641,8 @@
         }
         if (e.key === 'Escape') {
           if (dom.searchModal.classList.contains('active')) closeOmniSearch();
-          if (dom.splitWorkbench.classList.contains('active')) closeWorkbench();
-          if (dom.mapModal.classList.contains('active')) dom.mapModal.classList.remove('active');
+          if (dom.splitWorkbench.classList.contains('active')) closeWorkbench(true);
+          if (dom.mapModal.classList.contains('active')) closeMapModal(true);
           closeDrawer();
         }
       });
@@ -2459,23 +2698,30 @@
         return parsedLines.join('<br>');
       }
 
-      function openMapModal() {
+      function openMapModal(pushHistory = true) {
         dom.mapContentArea.innerHTML = parseMarkdownToHtml(window.__MAP_GUIDE_MD__);
         dom.mapModal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        localStorage.setItem('cbse_map_open', 'true');
+        updateUrl(pushHistory);
       }
 
-      dom.openMapWorkBtn.addEventListener('click', openMapModal);
-      dom.bottomNavMap.addEventListener('click', openMapModal);
-
-      dom.closeMapModalBtn.addEventListener('click', () => {
+      function closeMapModal(updateHistory = true) {
         dom.mapModal.classList.remove('active');
         document.body.style.overflow = '';
-      });
+        localStorage.setItem('cbse_map_open', 'false');
+        if (updateHistory) {
+          updateUrl(false);
+        }
+      }
+
+      dom.openMapWorkBtn.addEventListener('click', () => openMapModal(true));
+      dom.bottomNavMap.addEventListener('click', () => openMapModal(true));
+
+      dom.closeMapModalBtn.addEventListener('click', () => closeMapModal(true));
       dom.mapModal.addEventListener('click', (e) => {
         if (e.target === dom.mapModal) {
-          dom.mapModal.classList.remove('active');
-          document.body.style.overflow = '';
+          closeMapModal(true);
         }
       });
 
@@ -2486,6 +2732,8 @@
         document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state.selectedSubject = pill.getAttribute('data-subject');
+        localStorage.setItem('cbse_subject', state.selectedSubject);
+        updateUrl(false);
         renderMaterials();
       });
 
@@ -2495,6 +2743,8 @@
         dom.yearChipGroup.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.selectedYear = chip.getAttribute('data-year');
+        localStorage.setItem('cbse_year', state.selectedYear);
+        updateUrl(false);
         renderMaterials();
         if (window.innerWidth <= 900) closeDrawer();
       });
@@ -2505,35 +2755,96 @@
         dom.typeChipGroup.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.selectedType = chip.getAttribute('data-type');
+        localStorage.setItem('cbse_type', state.selectedType);
+        updateUrl(false);
         renderMaterials();
         if (window.innerWidth <= 900) closeDrawer();
       });
 
       dom.studyStatusFilter.addEventListener('change', (e) => {
         state.selectedStudyStatus = e.target.value;
+        localStorage.setItem('cbse_study_status', state.selectedStudyStatus);
+        updateUrl(false);
         renderMaterials();
       });
 
       dom.pairedOnlyToggle.addEventListener('change', (e) => {
         state.pairedOnly = e.target.checked;
+        localStorage.setItem('cbse_paired_only', state.pairedOnly);
+        updateUrl(false);
         renderMaterials();
       });
 
       dom.sortSelect.addEventListener('change', (e) => {
         state.sortBy = e.target.value;
+        localStorage.setItem('cbse_sort_by', state.sortBy);
+        updateUrl(false);
         renderMaterials();
       });
 
       dom.viewModeToggle.addEventListener('click', () => {
         state.viewMode = state.viewMode === 'grid' ? 'table' : 'grid';
         dom.viewModeIcon.textContent = state.viewMode === 'grid' ? '⊞' : '☰';
+        localStorage.setItem('cbse_view_mode', state.viewMode);
+        updateUrl(false);
         renderMaterials();
       });
 
+      // Browser History PopState & HashChange Navigation
+      function onHistoryNavigation() {
+        const params = getUrlParams();
+
+        state.selectedSubject = params.get('subject') || 'All';
+        state.selectedCategory = params.get('category') || 'All';
+        state.selectedYear = params.get('year') || 'All';
+        state.selectedType = params.get('type') || 'All';
+        state.selectedStudyStatus = params.get('status') || 'all';
+        state.sortBy = params.get('sort') || 'year_desc';
+        state.pairedOnly = params.get('paired') === '1' || params.get('paired') === 'true';
+        state.viewMode = params.get('view') || 'grid';
+        state.searchQuery = params.get('q') || '';
+
+        syncFilterControls();
+        renderCategoryNav();
+        renderMaterials();
+
+        const docId = params.get('doc');
+        if (docId) {
+          const rightId = params.get('right');
+          const isSplit = !!rightId || params.get('split') !== null;
+          if (params.get('split')) state.splitMode = params.get('split');
+          if (params.get('tab')) state.activeMobileTab = params.get('tab');
+          if (!dom.splitWorkbench.classList.contains('active') || !state.activeLeftItem || state.activeLeftItem.id !== docId) {
+            openWorkbench(docId, isSplit, false, rightId);
+          }
+        } else {
+          if (dom.splitWorkbench.classList.contains('active')) {
+            closeWorkbench(false);
+          }
+        }
+
+        if (params.get('map') === '1') {
+          if (!dom.mapModal.classList.contains('active')) {
+            openMapModal(false);
+          }
+        } else {
+          if (dom.mapModal.classList.contains('active')) {
+            closeMapModal(false);
+          }
+        }
+      }
+
+      window.addEventListener('popstate', onHistoryNavigation);
+      window.addEventListener('hashchange', onHistoryNavigation);
+
       // Initial Bootstrap
+      initNavigationAndState();
+      syncFilterControls();
       renderCategoryNav();
       updateProgressMetrics();
       renderMaterials();
+      restoreOpenDocuments();
+      updateUrl(false);
 
     })();
   </script>

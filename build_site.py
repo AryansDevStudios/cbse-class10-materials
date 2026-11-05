@@ -7,6 +7,11 @@ MAP_GUIDE_PATH = r"D:\CBSE Materials\Map Work\CBSE_Class_10_Social_Science_Compl
 SCRATCH_DIR = r"C:\Users\aryan\.gemini\antigravity\scratch\academic-command-center"
 DEST_DIR = r"D:\CBSE Materials"
 
+# GitHub & Storage Configurations
+GITHUB_USER = "AryansDevStudios"
+GITHUB_REPO = "cbse-class10-materials"
+GITHUB_BRANCH = "main"
+
 def load_data():
     with open(INDEX_JSON_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -27,15 +32,18 @@ def build():
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="description" content="CBSE Class 10 Academic Command Center - High-efficiency archive of official board papers, marking schemes, textbooks, exemplars, and topper answers." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#090b10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="CBSE Class 10 Academic Command Center - High-efficiency mobile & desktop archive of board papers, marking schemes, textbooks, exemplars, and topper answers with Mozilla PDF.js viewer." />
   <title>CBSE Academic Command Center — Class 10 Vault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* ============================================================
-       DESIGN TOKENS — High-Efficiency Linear / DevDocs Dark Theme
+       DESIGN TOKENS — High-Efficiency Linear / DevDocs Theme
        ============================================================ */
     :root {{
       --bg-canvas: #090b10;
@@ -43,7 +51,7 @@ def build():
       --bg-surface: #151a26;
       --bg-elevated: #1b2232;
       --bg-overlay: #232c40;
-      --bg-hover: rgba(255, 255, 255, 0.05);
+      --bg-hover: rgba(255, 255, 255, 0.06);
       --bg-active: rgba(99, 102, 241, 0.15);
 
       --border-subtle: rgba(255, 255, 255, 0.08);
@@ -60,7 +68,7 @@ def build():
       --accent-cyan: #06b6d4;
       --accent-cyan-soft: rgba(6, 182, 212, 0.12);
       --accent-emerald: #10b981;
-      --accent-emerald-soft: rgba(16, 185, 129, 0.12);
+      --accent-emerald-soft: rgba(16, 185, 129, 0.14);
       --accent-amber: #f59e0b;
       --accent-amber-soft: rgba(245, 158, 11, 0.12);
       --accent-rose: #f43f5e;
@@ -82,12 +90,12 @@ def build():
       --font-mono: 'JetBrains Mono', monospace;
 
       --sidebar-width: 290px;
-      --header-height: 64px;
+      --header-height: 60px;
+      --bottom-nav-height: 60px;
       --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
       --transition-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
     }}
 
-    /* Light Theme Override */
     [data-theme="light"] {{
       --bg-canvas: #f8fafc;
       --bg-subtle: #f1f5f9;
@@ -112,36 +120,41 @@ def build():
       --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
     }}
 
-    /* Reset & Base */
     *, *::before, *::after {{
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }}
 
     html, body {{
       height: 100%;
+      width: 100%;
       font-family: var(--font-sans);
       background: var(--bg-canvas);
       color: var(--text-primary);
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }}
 
     a {{ color: inherit; text-decoration: none; }}
     button, input, select {{ font: inherit; color: inherit; border: none; background: none; }}
-    button {{ cursor: pointer; }}
+    button {{ cursor: pointer; touch-action: manipulation; }}
 
-    /* Layout Skeleton */
     .app-root {{
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh;
       width: 100vw;
       overflow: hidden;
+      position: relative;
     }}
 
-    /* Header */
+    /* ============================================================
+       TOP HEADER
+       ============================================================ */
     .header {{
       height: var(--header-height);
       background: var(--bg-surface);
@@ -149,8 +162,8 @@ def build():
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
-      gap: 16px;
+      padding: 0 16px;
+      gap: 12px;
       z-index: 40;
       flex-shrink: 0;
     }}
@@ -158,7 +171,22 @@ def build():
     .header-left {{
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      min-width: 0;
+    }}
+
+    .mobile-menu-btn {{
+      display: none;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--text-primary);
+      flex-shrink: 0;
     }}
 
     .brand {{
@@ -166,8 +194,9 @@ def build():
       align-items: center;
       gap: 10px;
       font-weight: 800;
-      font-size: 16px;
+      font-size: 15px;
       letter-spacing: -0.02em;
+      white-space: nowrap;
     }}
 
     .brand-icon {{
@@ -180,21 +209,21 @@ def build():
       justify-content: center;
       color: white;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+      flex-shrink: 0;
     }}
 
     .brand-badge {{
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
       border-radius: var(--radius-full);
       background: var(--accent-indigo-soft);
       color: var(--accent-indigo);
       border: 1px solid rgba(99, 102, 241, 0.25);
     }}
 
-    /* Omni Search Bar */
     .omni-search-btn {{
       display: flex;
       align-items: center;
@@ -205,7 +234,8 @@ def build():
       border-radius: var(--radius-md);
       color: var(--text-muted);
       font-size: 13px;
-      min-width: 280px;
+      min-width: 240px;
+      max-width: 340px;
       transition: var(--transition-fast);
     }}
 
@@ -221,37 +251,53 @@ def build():
       font-family: var(--font-mono);
       background: var(--bg-surface);
       border: 1px solid var(--border-medium);
-      padding: 2px 6px;
+      padding: 1px 6px;
       border-radius: 4px;
       color: var(--text-muted);
     }}
 
-    /* Header Right Actions */
+    /* Header Progress Tracker */
+    .header-progress-box {{
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 170px;
+      padding: 4px 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }}
+
+    .progress-text-row {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }}
+
+    .progress-bar-track {{
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }}
+
+    .progress-bar-fill {{
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+      width: 0%;
+    }}
+
     .header-right {{
       display: flex;
       align-items: center;
-      gap: 12px;
-    }}
-
-    .stats-pill {{
-      display: flex;
-      align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      background: var(--bg-subtle);
-      padding: 6px 12px;
-      border-radius: var(--radius-full);
-      border: 1px solid var(--border-subtle);
-    }}
-
-    .stats-dot {{
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-emerald);
-      box-shadow: 0 0 8px var(--accent-emerald);
+      flex-shrink: 0;
     }}
 
     .icon-btn {{
@@ -265,6 +311,7 @@ def build():
       background: var(--bg-subtle);
       border: 1px solid var(--border-subtle);
       transition: var(--transition-fast);
+      flex-shrink: 0;
     }}
 
     .icon-btn:hover {{
@@ -273,24 +320,31 @@ def build():
       border-color: var(--border-medium);
     }}
 
-    /* Subject Pills Bar */
+    /* ============================================================
+       SUBJECT SCROLLER BAR
+       ============================================================ */
     .subject-bar {{
       height: 48px;
       background: var(--bg-subtle);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
-      padding: 0 20px;
+      padding: 0 16px;
       gap: 8px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
       flex-shrink: 0;
     }}
+
+    .subject-bar::-webkit-scrollbar {{ display: none; }}
+    .subject-bar {{ scrollbar-width: none; }}
 
     .subject-pill {{
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
+      padding: 6px 13px;
       border-radius: var(--radius-full);
       font-size: 13px;
       font-weight: 600;
@@ -299,6 +353,8 @@ def build():
       border: 1px solid var(--border-subtle);
       white-space: nowrap;
       transition: var(--transition-fast);
+      scroll-snap-align: start;
+      flex-shrink: 0;
     }}
 
     .subject-pill:hover {{
@@ -317,17 +373,20 @@ def build():
     .pill-count {{
       font-size: 11px;
       font-family: var(--font-mono);
-      opacity: 0.8;
-      background: rgba(0, 0, 0, 0.2);
+      opacity: 0.85;
+      background: rgba(0, 0, 0, 0.22);
       padding: 1px 6px;
       border-radius: var(--radius-full);
     }}
 
-    /* Body Layout */
+    /* ============================================================
+       MAIN WORKSPACE
+       ============================================================ */
     .main-container {{
       display: flex;
       flex: 1;
       height: calc(100vh - var(--header-height) - 48px);
+      height: calc(100dvh - var(--header-height) - 48px);
       overflow: hidden;
       position: relative;
     }}
@@ -340,12 +399,23 @@ def build():
       display: flex;
       flex-direction: column;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       flex-shrink: 0;
       user-select: none;
+      z-index: 50;
+    }}
+
+    .drawer-header-bar {{
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
     }}
 
     .sidebar-section {{
-      padding: 16px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border-subtle);
     }}
 
@@ -365,12 +435,12 @@ def build():
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 10px;
+      padding: 9px 12px;
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 500;
       color: var(--text-secondary);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       transition: var(--transition-fast);
       cursor: pointer;
     }}
@@ -405,12 +475,11 @@ def build():
       font-family: var(--font-mono);
       color: var(--text-muted);
       background: var(--bg-elevated);
-      padding: 1px 6px;
+      padding: 1px 7px;
       border-radius: var(--radius-full);
       flex-shrink: 0;
     }}
 
-    /* Filter Chips in Sidebar */
     .chip-group {{
       display: flex;
       flex-wrap: wrap;
@@ -418,7 +487,7 @@ def build():
     }}
 
     .chip {{
-      padding: 4px 9px;
+      padding: 5px 10px;
       border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 500;
@@ -441,6 +510,22 @@ def build():
       border-color: var(--text-primary);
     }}
 
+    .drawer-backdrop {{
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 45;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-smooth);
+    }}
+
+    .drawer-backdrop.active {{
+      opacity: 1;
+      pointer-events: auto;
+    }}
+
     /* Main Content Stage */
     .content-stage {{
       flex: 1;
@@ -448,33 +533,36 @@ def build():
       flex-direction: column;
       overflow: hidden;
       background: var(--bg-canvas);
+      position: relative;
     }}
 
     /* Stage Toolbar */
     .stage-toolbar {{
-      height: 52px;
-      padding: 0 24px;
+      min-height: 50px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-subtle);
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
       flex-shrink: 0;
     }}
 
     .toolbar-left {{
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       font-size: 13px;
       color: var(--text-secondary);
+      flex-wrap: wrap;
     }}
 
     .active-filter-badge {{
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 3px 10px;
+      padding: 2px 8px;
       background: var(--bg-surface);
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-full);
@@ -484,15 +572,17 @@ def build():
     .toolbar-right {{
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: auto;
     }}
 
     .select-dropdown {{
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 6px 12px;
-      font-size: 13px;
+      padding: 5px 10px;
+      font-size: 12px;
       color: var(--text-primary);
       outline: none;
       cursor: pointer;
@@ -501,12 +591,13 @@ def build():
     .toggle-switch-label {{
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-size: 12px;
       font-weight: 600;
       color: var(--text-secondary);
       cursor: pointer;
       user-select: none;
+      white-space: nowrap;
     }}
 
     .toggle-checkbox {{
@@ -520,14 +611,14 @@ def build():
     .stage-scroll {{
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
     }}
 
-    /* Materials Grid */
     .materials-grid {{
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 14px;
     }}
 
     /* Card Item */
@@ -535,10 +626,10 @@ def build():
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 18px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       transition: var(--transition-fast);
       position: relative;
     }}
@@ -554,26 +645,32 @@ def build():
       border-left: 3px solid var(--accent-emerald);
     }}
 
+    .card.is-completed {{
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.04);
+    }}
+
     .card-top {{
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }}
 
     .card-tags {{
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }}
 
     .tag {{
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 10px;
+      font-weight: 700;
       padding: 2px 7px;
       border-radius: var(--radius-sm);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      white-space: nowrap;
     }}
 
     .tag-subject-math {{ background: rgba(59, 130, 246, 0.15); color: #60a5fa; }}
@@ -597,6 +694,12 @@ def build():
       border: 1px solid var(--border-subtle);
     }}
 
+    .tag-completed {{
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }}
+
     .card-title {{
       font-size: 14px;
       font-weight: 600;
@@ -612,9 +715,10 @@ def build():
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       font-family: var(--font-mono);
+      flex-wrap: wrap;
     }}
 
     .card-actions {{
@@ -624,6 +728,7 @@ def build():
       gap: 8px;
       padding-top: 10px;
       border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
     }}
 
     .btn {{
@@ -632,11 +737,13 @@ def build():
       justify-content: center;
       gap: 6px;
       padding: 7px 12px;
+      min-height: 36px;
       border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 600;
       transition: var(--transition-fast);
       cursor: pointer;
+      white-space: nowrap;
     }}
 
     .btn-primary {{
@@ -653,6 +760,7 @@ def build():
       background: linear-gradient(135deg, #10b981, #06b6d4);
       color: white;
       font-weight: 700;
+      flex: 1;
     }}
 
     .btn-split:hover {{
@@ -672,9 +780,31 @@ def build():
       border-color: var(--border-medium);
     }}
 
+    .btn-done {{
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      padding: 6px 10px;
+    }}
+
+    .btn-done.done {{
+      background: rgba(16, 185, 129, 0.16);
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.4);
+      font-weight: 700;
+    }}
+
     /* Table View Layout */
+    .table-container {{
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }}
+
     .materials-table {{
       width: 100%;
+      min-width: 680px;
       border-collapse: collapse;
       text-align: left;
       font-size: 13px;
@@ -700,7 +830,49 @@ def build():
     }}
 
     /* ============================================================
-       DUAL-PANE SPLIT WORKBENCH (THE STANDOUT HERO FEATURE)
+       MOBILE BOTTOM NAVIGATION BAR
+       ============================================================ */
+    .mobile-bottom-nav {{
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--bottom-nav-height);
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 60;
+      align-items: center;
+      justify-content: space-around;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+    }}
+
+    .bottom-nav-item {{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      flex: 1;
+      height: 100%;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      position: relative;
+    }}
+
+    .bottom-nav-item:active, .bottom-nav-item.active {{
+      color: var(--accent-indigo);
+    }}
+
+    .bottom-nav-icon {{
+      font-size: 18px;
+    }}
+
+    /* ============================================================
+       DUAL-PANE SPLIT WORKBENCH (MOZILLA PDF.JS INTEGRATED)
        ============================================================ */
     .split-workbench {{
       position: fixed;
@@ -708,6 +880,7 @@ def build():
       left: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       background: var(--bg-canvas);
       z-index: 100;
       display: none;
@@ -725,29 +898,31 @@ def build():
     }}
 
     .workbench-header {{
-      height: 56px;
+      min-height: 54px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      gap: 16px;
+      padding: 6px 14px;
+      gap: 10px;
       flex-shrink: 0;
+      flex-wrap: wrap;
     }}
 
     .workbench-titles {{
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       flex: 1;
       overflow: hidden;
+      min-width: 200px;
     }}
 
     .doc-pill {{
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       padding: 4px 10px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
@@ -755,7 +930,7 @@ def build():
       font-size: 12px;
       font-weight: 600;
       color: var(--text-primary);
-      max-width: 45%;
+      max-width: 48%;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -764,10 +939,39 @@ def build():
     .doc-pill.left {{ border-left: 3px solid var(--accent-indigo); }}
     .doc-pill.right {{ border-left: 3px solid var(--accent-emerald); }}
 
+    .mobile-tab-switcher {{
+      display: none;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      gap: 4px;
+      width: 100%;
+      margin: 4px 0;
+    }}
+
+    .mobile-tab-btn {{
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: center;
+      transition: var(--transition-fast);
+    }}
+
+    .mobile-tab-btn.active {{
+      background: var(--accent-indigo);
+      color: white;
+      box-shadow: 0 1px 6px rgba(99, 102, 241, 0.4);
+    }}
+
     .workbench-controls {{
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-wrap: wrap;
     }}
 
     .workbench-body {{
@@ -792,7 +996,7 @@ def build():
       width: 100%;
       height: 100%;
       border: none;
-      background: white;
+      background: #2b2b2b;
     }}
 
     .pane-divider {{
@@ -806,7 +1010,6 @@ def build():
       background: var(--accent-indigo);
     }}
 
-    /* Pane Top Bar */
     .pane-bar {{
       height: 38px;
       background: var(--bg-elevated);
@@ -815,12 +1018,12 @@ def build():
       align-items: center;
       justify-content: space-between;
       padding: 0 12px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-secondary);
+      gap: 8px;
     }}
 
-    /* Companion Document Selector Dropdown */
     .companion-select {{
       background: var(--bg-surface);
       border: 1px solid var(--border-medium);
@@ -828,9 +1031,26 @@ def build():
       color: var(--text-primary);
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 8px;
+      padding: 4px 8px;
       outline: none;
       cursor: pointer;
+      max-width: 200px;
+    }}
+
+    .mobile-flip-btn {{
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      z-index: 110;
+      background: linear-gradient(135deg, #6366f1, #10b981);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }}
 
     /* ============================================================
@@ -842,13 +1062,13 @@ def build():
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       z-index: 150;
       display: none;
       align-items: flex-start;
       justify-content: center;
-      padding-top: 100px;
+      padding-top: 80px;
     }}
 
     .search-modal-backdrop.active {{
@@ -857,7 +1077,7 @@ def build():
 
     .search-modal {{
       width: 640px;
-      max-width: 90vw;
+      max-width: 92vw;
       background: var(--bg-surface);
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-lg);
@@ -877,13 +1097,13 @@ def build():
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px 20px;
+      padding: 14px 18px;
       border-bottom: 1px solid var(--border-subtle);
     }}
 
     .search-input-box input {{
       flex: 1;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
       color: var(--text-primary);
       outline: none;
@@ -892,18 +1112,19 @@ def build():
     .search-results-list {{
       max-height: 400px;
       overflow-y: auto;
-      padding: 10px;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px;
     }}
 
     .search-result-item {{
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: var(--radius-sm);
       cursor: pointer;
       transition: var(--transition-fast);
-      gap: 12px;
+      gap: 10px;
     }}
 
     .search-result-item:hover, .search-result-item.highlighted {{
@@ -911,7 +1132,7 @@ def build():
     }}
 
     .search-footer {{
-      padding: 10px 20px;
+      padding: 10px 16px;
       background: var(--bg-subtle);
       border-top: 1px solid var(--border-subtle);
       display: flex;
@@ -922,7 +1143,7 @@ def build():
     }}
 
     /* ============================================================
-       MAP WORK INTERACTIVE GUIDE MODAL
+       MAP WORK GUIDE MODAL
        ============================================================ */
     .map-modal-backdrop {{
       position: fixed;
@@ -930,7 +1151,7 @@ def build():
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(8px);
       z-index: 140;
       display: none;
@@ -956,24 +1177,26 @@ def build():
     }}
 
     .map-header {{
-      padding: 16px 24px;
+      padding: 14px 18px;
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: var(--bg-subtle);
+      gap: 12px;
     }}
 
     .map-content {{
       flex: 1;
       overflow-y: auto;
-      padding: 24px;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
       line-height: 1.6;
     }}
 
     .map-content h2 {{
       color: var(--accent-amber);
-      font-size: 18px;
+      font-size: 17px;
       margin: 20px 0 10px 0;
       border-bottom: 1px solid var(--border-subtle);
       padding-bottom: 6px;
@@ -981,12 +1204,13 @@ def build():
 
     .map-content h3 {{
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 14px;
       margin: 16px 0 8px 0;
     }}
 
     .map-content table {{
       width: 100%;
+      min-width: 500px;
       border-collapse: collapse;
       margin: 12px 0 20px 0;
       font-size: 13px;
@@ -1003,24 +1227,157 @@ def build():
       color: var(--text-muted);
     }}
 
-    .map-content ul, .map-content ol {{
-      margin-left: 24px;
+    .map-table-wrap {{
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       margin-bottom: 16px;
     }}
 
-    .map-content li {{
-      margin-bottom: 6px;
+    /* ============================================================
+       RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
+       ============================================================ */
+    @media (max-width: 900px) {{
+      :root {{
+        --header-height: 54px;
+      }}
+
+      .mobile-menu-btn {{
+        display: flex;
+      }}
+
+      .omni-search-btn {{
+        min-width: auto;
+        padding: 7px 10px;
+      }}
+
+      .omni-search-btn span:first-of-type {{
+        display: none;
+      }}
+
+      .search-key-badge {{
+        display: none;
+      }}
+
+      .header-progress-box {{
+        display: none;
+      }}
+
+      #openMapWorkBtn {{
+        display: none;
+      }}
+
+      .sidebar {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 310px;
+        max-width: 85vw;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 120;
+        transform: translateX(-100%);
+        transition: transform var(--transition-smooth);
+        box-shadow: var(--shadow-lg);
+      }}
+
+      .sidebar.drawer-open {{
+        transform: translateX(0);
+      }}
+
+      .drawer-header-bar {{
+        display: flex;
+      }}
+
+      .main-container {{
+        height: calc(100vh - var(--header-height) - 48px);
+        height: calc(100dvh - var(--header-height) - 48px);
+      }}
+
+      .content-stage {{
+        padding-bottom: var(--bottom-nav-height);
+      }}
+
+      .mobile-bottom-nav {{
+        display: flex;
+      }}
     }}
 
-    /* Scrollbars */
-    ::-webkit-scrollbar {{
-      width: 6px;
-      height: 6px;
-    }}
-    ::-webkit-scrollbar-track {{ background: transparent; }}
-    ::-webkit-scrollbar-thumb {{
-      background: var(--border-medium);
-      border-radius: 999px;
+    @media (max-width: 640px) {{
+      .stage-scroll {{
+        padding: 12px;
+      }}
+
+      .materials-grid {{
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }}
+
+      .card {{
+        padding: 14px;
+      }}
+
+      .card-actions {{
+        gap: 6px;
+      }}
+
+      .btn-split {{
+        width: 100%;
+        order: -1;
+      }}
+
+      .workbench-header {{
+        padding: 8px 12px;
+      }}
+
+      .workbench-titles {{
+        display: none;
+      }}
+
+      .mobile-tab-switcher {{
+        display: flex;
+      }}
+
+      .pane-divider {{
+        display: none;
+      }}
+
+      .mobile-flip-btn {{
+        display: block;
+      }}
+
+      #splitPreset50, #splitPresetLeft, #splitPresetRight {{
+        display: none;
+      }}
+
+      .search-modal-backdrop {{
+        padding-top: 0;
+      }}
+
+      .search-modal {{
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: 100vw;
+        border-radius: 0;
+        border: none;
+      }}
+
+      .search-results-list {{
+        max-height: calc(100vh - 120px);
+      }}
+
+      .map-modal {{
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: 100vw;
+        border-radius: 0;
+      }}
+
+      .map-content {{
+        padding: 14px;
+      }}
     }}
   </style>
 </head>
@@ -1029,23 +1386,33 @@ def build():
     <!-- Top Header -->
     <header class="header">
       <div class="header-left">
+        <button class="mobile-menu-btn" id="mobileDrawerBtn" title="Open Categories & Filters">
+          ☰
+        </button>
+
         <div class="brand">
           <div class="brand-icon">⚡</div>
-          <span>CBSE Command Center</span>
-          <span class="brand-badge">Class 10 Vault</span>
+          <span>CBSE Command</span>
+          <span class="brand-badge">Class 10</span>
         </div>
 
         <button class="omni-search-btn" id="openOmniSearch">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <span>Search 896 documents, sets, years...</span>
+          <span>Search 896 materials...</span>
           <span class="search-key-badge">Ctrl K</span>
         </button>
       </div>
 
       <div class="header-right">
-        <div class="stats-pill">
-          <span class="stats-dot"></span>
-          <span id="headerStatsText">896 Verified Resources</span>
+        <!-- Study Completion Progress Tracker -->
+        <div class="header-progress-box" title="Study Completion Tracker">
+          <div class="progress-text-row">
+            <span>Completed</span>
+            <span id="progressSummaryText">0 / 896 (0%)</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
         </div>
 
         <button class="btn btn-secondary" id="openMapWorkBtn" title="CBSE Class 10 Social Science Map Work Guide">
@@ -1092,8 +1459,17 @@ def build():
 
     <!-- Main Workspace -->
     <div class="main-container">
-      <!-- Left Category Sidebar -->
-      <aside class="sidebar">
+      <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+      <!-- Left Category Sidebar / Mobile Drawer -->
+      <aside class="sidebar" id="sidebarDrawer">
+        <div class="drawer-header-bar">
+          <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px;">
+            <span>⚡ Filters & Categories</span>
+          </div>
+          <button class="icon-btn" id="closeDrawerBtn" title="Close Drawer">✕</button>
+        </div>
+
         <div class="sidebar-section">
           <div class="sidebar-title">Categories</div>
           <div id="categoryNavList">
@@ -1141,14 +1517,21 @@ def build():
           </div>
 
           <div class="toolbar-right">
+            <!-- Study Status Filter -->
+            <select class="select-dropdown" id="studyStatusFilter" title="Filter by Study Progress">
+              <option value="all">Status: All (896)</option>
+              <option value="unfinished">Status: ⬜ Unfinished Only</option>
+              <option value="completed">Status: ✅ Completed Only</option>
+            </select>
+
             <label class="toggle-switch-label" title="Only display items with paired Question Paper + Marking Scheme">
               <input type="checkbox" id="pairedOnlyToggle" class="toggle-checkbox" />
-              <span>⚡ Paired Only (Split View)</span>
+              <span>⚡ Paired (Split View)</span>
             </label>
 
             <select class="select-dropdown" id="sortSelect">
-              <option value="year_desc">Year (Newest first)</option>
-              <option value="year_asc">Year (Oldest first)</option>
+              <option value="year_desc">Year (Newest)</option>
+              <option value="year_asc">Year (Oldest)</option>
               <option value="title_asc">Title (A to Z)</option>
               <option value="size_desc">File Size (Largest)</option>
             </select>
@@ -1164,28 +1547,55 @@ def build():
           <div class="materials-grid" id="materialsGrid">
             <!-- Dynamically populated cards -->
           </div>
-          <table class="materials-table" id="materialsTable" style="display: none;">
-            <thead>
-              <tr>
-                <th>Title & Series</th>
-                <th>Subject</th>
-                <th>Category</th>
-                <th>Year</th>
-                <th>Size</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="materialsTableBody">
-              <!-- Dynamically populated rows -->
-            </tbody>
-          </table>
+          <div class="table-container">
+            <table class="materials-table" id="materialsTable" style="display: none;">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Title & Series</th>
+                  <th>Subject</th>
+                  <th>Category</th>
+                  <th>Year</th>
+                  <th>Size</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="materialsTableBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+      <button class="bottom-nav-item" id="bottomNavSearch">
+        <span class="bottom-nav-icon">🔍</span>
+        <span>Search</span>
+      </button>
+      <button class="bottom-nav-item" id="bottomNavFilters">
+        <span class="bottom-nav-icon">⚡</span>
+        <span>Filters</span>
+      </button>
+      <button class="bottom-nav-item" id="bottomNavMap">
+        <span class="bottom-nav-icon">🗺️</span>
+        <span>Map Work</span>
+      </button>
+      <button class="bottom-nav-item" id="bottomNavTheme">
+        <span class="bottom-nav-icon" id="bottomNavThemeIcon">🌓</span>
+        <span>Theme</span>
+      </button>
+      <button class="bottom-nav-item" id="bottomNavTop">
+        <span class="bottom-nav-icon">⬆️</span>
+        <span>Top</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ============================================================
-       DUAL-PANE SPLIT WORKBENCH
+       DUAL-PANE SPLIT WORKBENCH (MOZILLA PDF.JS INTEGRATED)
        ============================================================ -->
   <div class="split-workbench" id="splitWorkbench">
     <div class="workbench-header">
@@ -1200,9 +1610,30 @@ def build():
         </div>
       </div>
 
+      <div class="mobile-tab-switcher" id="mobileTabSwitcher">
+        <button class="mobile-tab-btn active" id="mobileTabLeft">📄 Question Paper</button>
+        <button class="mobile-tab-btn" id="mobileTabRight">🎯 Solution / Marking Scheme</button>
+      </div>
+
       <div class="workbench-controls">
+        <!-- PDF Viewer Engine Switcher -->
+        <select class="select-dropdown" id="viewerEngineSelect" title="PDF Viewer Engine" style="font-size: 11px;">
+          <option value="mozilla">🦊 Mozilla PDF.js</option>
+          <option value="native">🖥️ Native Browser</option>
+        </select>
+
+        <!-- PDF Storage Source Switcher -->
+        <select class="select-dropdown" id="pdfSourceSelect" title="PDF Storage Host" style="font-size: 11px;">
+          <option value="github_raw">GitHub Raw (Official)</option>
+          <option value="jsdelivr">jsDelivr CDN (Accelerated)</option>
+          <option value="local">Local / Same-Origin</option>
+        </select>
+
+        <!-- Workbench Mark Complete Toggle -->
+        <button class="btn btn-done" id="workbenchMarkDoneBtn">⬜ Mark Complete</button>
+
         <select class="companion-select" id="companionSelector" title="Switch Right Pane Document">
-          <option value="paired">Paired Marking Scheme / Solution</option>
+          <option value="paired">Paired Solution / Marking Scheme</option>
           <option value="topper_2025">Topper Answer Script 2025</option>
           <option value="topper_2024">Topper Answer Script 2024</option>
           <option value="topper_2023">Topper Answer Script 2023</option>
@@ -1211,20 +1642,25 @@ def build():
 
         <button class="btn btn-secondary" id="swapPanesBtn" title="Swap Left and Right Panes">⇄ Swap</button>
         <button class="btn btn-secondary" id="splitPreset50" title="50/50 Split View">50 / 50</button>
-        <button class="btn btn-secondary" id="splitPresetLeft" title="Focus Left Pane">Left Focus</button>
-        <button class="btn btn-secondary" id="splitPresetRight" title="Focus Right Pane">Right Focus</button>
-        <button class="btn btn-secondary" id="popoutBtn" title="Open in dedicated browser tab">↗ Pop Out</button>
+        <button class="btn btn-secondary" id="splitPresetLeft" title="Focus Left Pane">Left</button>
+        <button class="btn btn-secondary" id="splitPresetRight" title="Focus Right Pane">Right</button>
+        <button class="btn btn-secondary" id="popoutBtn" title="Open in browser tab">↗ Pop Out</button>
         <button class="btn btn-primary" id="closeWorkbenchBtn" title="Close Split Workbench (ESC)">✕ Close</button>
       </div>
     </div>
+
+    <!-- Mobile Quick Flip Floating Button -->
+    <button class="mobile-flip-btn" id="mobileFlipBtn">⚡ Switch to Solution ➔</button>
 
     <div class="workbench-body" id="workbenchBody">
       <div class="workbench-pane" id="leftPane">
         <div class="pane-bar">
           <span id="leftPaneLabel">Primary Document</span>
-          <a href="#" id="leftDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
+          <div style="display: flex; gap: 6px;">
+            <a href="#" id="leftDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
+          </div>
         </div>
-        <iframe id="leftIframe" src="about:blank"></iframe>
+        <iframe id="leftIframe" src="about:blank" allow="fullscreen"></iframe>
       </div>
 
       <div class="pane-divider" id="paneDivider"></div>
@@ -1232,9 +1668,11 @@ def build():
       <div class="workbench-pane" id="rightPane">
         <div class="pane-bar">
           <span id="rightPaneLabel">Solution / Marking Scheme</span>
-          <a href="#" id="rightDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
+          <div style="display: flex; gap: 6px;">
+            <a href="#" id="rightDownloadLink" target="_blank" class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px;">⬇ Download</a>
+          </div>
         </div>
-        <iframe id="rightIframe" src="about:blank"></iframe>
+        <iframe id="rightIframe" src="about:blank" allow="fullscreen"></iframe>
       </div>
     </div>
   </div>
@@ -1246,13 +1684,12 @@ def build():
     <div class="search-modal">
       <div class="search-input-box">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="omniSearchInput" placeholder="Search across all 896 CBSE materials (type e.g. 30-1-1, SQP 2027, Topper Science)..." autofocus />
+        <input type="search" id="omniSearchInput" placeholder="Search 896 materials (30-1-1, SQP, Topper, Science)..." autofocus />
+        <button class="icon-btn" id="closeSearchModalBtn" style="width: 30px; height: 30px;">✕</button>
       </div>
-      <div class="search-results-list" id="searchResultsList">
-        <!-- Results rendered here -->
-      </div>
+      <div class="search-results-list" id="searchResultsList"></div>
       <div class="search-footer">
-        <span>Press <kbd>↑</kbd> <kbd>↓</kbd> to navigate, <kbd>Enter</kbd> to preview, <kbd>ESC</kbd> to close</span>
+        <span>Press <kbd>↑</kbd> <kbd>↓</kbd> or tap to view, <kbd>ESC</kbd> to close</span>
         <span id="omniMatchCount">0 matches</span>
       </div>
     </div>
@@ -1264,16 +1701,13 @@ def build():
   <div class="map-modal-backdrop" id="mapModal">
     <div class="map-modal">
       <div class="map-header">
-        <div style="font-weight: 700; font-size: 16px;">🗺️ CBSE Class 10 Social Science — Complete Map Work Guide (5 Marks Guaranteed)</div>
+        <div style="font-weight: 700; font-size: 15px;">🗺️ Class 10 SST Complete Map Work Guide (5 Marks)</div>
         <button class="btn btn-secondary" id="closeMapModalBtn">✕ Close</button>
       </div>
-      <div class="map-content" id="mapContentArea">
-        <!-- Markdown parsed dynamically -->
-      </div>
+      <div class="map-content" id="mapContentArea"></div>
     </div>
   </div>
 
-  <!-- Embedded Complete Dataset for Offline / Local File:// Compatibility -->
   <script>
     window.__CBSE_DATA__ = {data_json_str};
     window.__MAP_GUIDE_MD__ = {map_guide_json_str};
@@ -1282,25 +1716,38 @@ def build():
   <!-- Application Logic -->
   <script>
     (function() {{
+      const GITHUB_USER = "{GITHUB_USER}";
+      const GITHUB_REPO = "{GITHUB_REPO}";
+      const GITHUB_BRANCH = "{GITHUB_BRANCH}";
+      const MOZILLA_VIEWER_BASE = "https://mozilla.github.io/pdf.js/web/viewer.html";
+
       const state = {{
         allMaterials: window.__CBSE_DATA__.materials || [],
         selectedSubject: 'All',
         selectedCategory: 'All',
         selectedYear: 'All',
         selectedType: 'All',
+        selectedStudyStatus: 'all', // 'all', 'unfinished', 'completed'
         pairedOnly: false,
         searchQuery: '',
         sortBy: 'year_desc',
-        viewMode: 'grid', // 'grid' or 'table'
+        viewMode: 'grid',
         theme: localStorage.getItem('cbse_theme') || 'dark',
+
+        // Completed Document Tracking (localStorage)
+        completedDocs: new Set(JSON.parse(localStorage.getItem('cbse_completed_docs') || '[]')),
+
+        // Viewer & Storage Config
+        viewerEngine: localStorage.getItem('cbse_viewer_engine') || 'mozilla', // 'mozilla' or 'native'
+        pdfSource: localStorage.getItem('cbse_pdf_source') || 'github_raw', // 'github_raw', 'jsdelivr', 'local'
 
         // Workbench state
         activeLeftItem: null,
         activeRightItem: null,
-        splitMode: '50-50'
+        splitMode: '50-50',
+        activeMobileTab: 'left'
       }};
 
-      // Category definitions with icons
       const categoryMetadata = [
         {{ id: 'All', name: 'All Categories', icon: '📂' }},
         {{ id: 'Board Examination Papers', name: 'Board Papers (2022-24)', icon: '📜' }},
@@ -1314,7 +1761,6 @@ def build():
         {{ id: 'Syllabus and Curriculum 2027', name: 'Syllabus 2026-27', icon: '📋' }}
       ];
 
-      // Cache DOM
       const dom = {{
         categoryNavList: document.getElementById('categoryNavList'),
         materialsGrid: document.getElementById('materialsGrid'),
@@ -1323,6 +1769,7 @@ def build():
         subjectBar: document.getElementById('subjectBar'),
         yearChipGroup: document.getElementById('yearChipGroup'),
         typeChipGroup: document.getElementById('typeChipGroup'),
+        studyStatusFilter: document.getElementById('studyStatusFilter'),
         pairedOnlyToggle: document.getElementById('pairedOnlyToggle'),
         sortSelect: document.getElementById('sortSelect'),
         viewModeToggle: document.getElementById('viewModeToggle'),
@@ -1331,6 +1778,25 @@ def build():
         activeFilterSummary: document.getElementById('activeFilterSummary'),
         themeToggleBtn: document.getElementById('themeToggleBtn'),
         themeIcon: document.getElementById('themeIcon'),
+        stageScrollArea: document.getElementById('stageScrollArea'),
+
+        // Progress Tracking Elements
+        progressSummaryText: document.getElementById('progressSummaryText'),
+        progressBarFill: document.getElementById('progressBarFill'),
+
+        // Mobile Drawer
+        mobileDrawerBtn: document.getElementById('mobileDrawerBtn'),
+        sidebarDrawer: document.getElementById('sidebarDrawer'),
+        drawerBackdrop: document.getElementById('drawerBackdrop'),
+        closeDrawerBtn: document.getElementById('closeDrawerBtn'),
+
+        // Mobile Bottom Nav
+        bottomNavSearch: document.getElementById('bottomNavSearch'),
+        bottomNavFilters: document.getElementById('bottomNavFilters'),
+        bottomNavMap: document.getElementById('bottomNavMap'),
+        bottomNavTheme: document.getElementById('bottomNavTheme'),
+        bottomNavThemeIcon: document.getElementById('bottomNavThemeIcon'),
+        bottomNavTop: document.getElementById('bottomNavTop'),
         
         // Workbench
         splitWorkbench: document.getElementById('splitWorkbench'),
@@ -1347,8 +1813,16 @@ def build():
         splitPresetRight: document.getElementById('splitPresetRight'),
         popoutBtn: document.getElementById('popoutBtn'),
         companionSelector: document.getElementById('companionSelector'),
+        viewerEngineSelect: document.getElementById('viewerEngineSelect'),
+        pdfSourceSelect: document.getElementById('pdfSourceSelect'),
+        workbenchMarkDoneBtn: document.getElementById('workbenchMarkDoneBtn'),
         leftPane: document.getElementById('leftPane'),
         rightPane: document.getElementById('rightPane'),
+
+        // Mobile Workbench Tabs
+        mobileTabLeft: document.getElementById('mobileTabLeft'),
+        mobileTabRight: document.getElementById('mobileTabRight'),
+        mobileFlipBtn: document.getElementById('mobileFlipBtn'),
 
         // Omni Search
         openOmniSearch: document.getElementById('openOmniSearch'),
@@ -1356,6 +1830,7 @@ def build():
         omniSearchInput: document.getElementById('omniSearchInput'),
         searchResultsList: document.getElementById('searchResultsList'),
         omniMatchCount: document.getElementById('omniMatchCount'),
+        closeSearchModalBtn: document.getElementById('closeSearchModalBtn'),
 
         // Map Work
         openMapWorkBtn: document.getElementById('openMapWorkBtn'),
@@ -1364,10 +1839,279 @@ def build():
         mapContentArea: document.getElementById('mapContentArea')
       }};
 
-      // Theme initialization
+      // ============================================================
+      // NAVIGATION & URL STATE SYNCHRONIZATION
+      // ============================================================
+      function getUrlParams() {{
+        let search = window.location.search;
+        if (!search && window.location.hash) {{
+          const h = window.location.hash.slice(1);
+          search = h.includes('?') ? h.slice(h.indexOf('?')) : (h.includes('=') ? '?' + h : '');
+        }}
+        return new URLSearchParams(search || '');
+      }}
+
+      function updateUrl(push = false) {{
+        const params = new URLSearchParams();
+        if (state.selectedSubject && state.selectedSubject !== 'All') params.set('subject', state.selectedSubject);
+        if (state.selectedCategory && state.selectedCategory !== 'All') params.set('category', state.selectedCategory);
+        if (state.selectedYear && state.selectedYear !== 'All') params.set('year', state.selectedYear);
+        if (state.selectedType && state.selectedType !== 'All') params.set('type', state.selectedType);
+        if (state.selectedStudyStatus && state.selectedStudyStatus !== 'all') params.set('status', state.selectedStudyStatus);
+        if (state.sortBy && state.sortBy !== 'year_desc') params.set('sort', state.sortBy);
+        if (state.pairedOnly) params.set('paired', '1');
+        if (state.viewMode && state.viewMode !== 'grid') params.set('view', state.viewMode);
+        if (state.searchQuery) params.set('q', state.searchQuery);
+
+        if (dom.splitWorkbench.classList.contains('active') && state.activeLeftItem) {{
+          params.set('doc', state.activeLeftItem.id);
+          if (state.activeRightItem) {{
+            params.set('right', state.activeRightItem.id);
+          }}
+          if (state.splitMode && state.splitMode !== '50-50') {{
+            params.set('split', state.splitMode);
+          }}
+          if (state.activeMobileTab && state.activeMobileTab !== 'left') {{
+            params.set('tab', state.activeMobileTab);
+          }}
+        }}
+
+        if (dom.mapModal.classList.contains('active')) {{
+          params.set('map', '1');
+        }}
+
+        const qs = params.toString();
+        const newUrl = qs ? (window.location.pathname + '?' + qs) : window.location.pathname;
+
+        try {{
+          if (window.location.protocol.startsWith('http')) {{
+            if (push) {{
+              window.history.pushState({{ ...state }}, '', newUrl);
+            }} else {{
+              window.history.replaceState({{ ...state }}, '', newUrl);
+            }}
+          }} else {{
+            const hashVal = qs ? '#' + qs : '';
+            if (window.location.hash !== hashVal) {{
+              if (push) window.location.hash = hashVal;
+              else window.location.replace(window.location.pathname + hashVal);
+            }}
+          }}
+        }} catch (e) {{
+          try {{
+            const hashVal = qs ? '#' + qs : '';
+            if (window.location.hash !== hashVal) {{
+              window.location.hash = hashVal;
+            }}
+          }} catch (err) {{}}
+        }}
+      }}
+
+      function initNavigationAndState() {{
+        const urlParams = getUrlParams();
+        const hasUrlParams = Array.from(urlParams.keys()).length > 0;
+
+        if (urlParams.has('subject')) {{
+          state.selectedSubject = urlParams.get('subject');
+        }} else if (localStorage.getItem('cbse_subject')) {{
+          state.selectedSubject = localStorage.getItem('cbse_subject');
+        }}
+
+        if (urlParams.has('category')) {{
+          state.selectedCategory = urlParams.get('category');
+        }} else if (localStorage.getItem('cbse_category')) {{
+          state.selectedCategory = localStorage.getItem('cbse_category');
+        }}
+
+        if (urlParams.has('year')) {{
+          state.selectedYear = urlParams.get('year');
+        }} else if (localStorage.getItem('cbse_year')) {{
+          state.selectedYear = localStorage.getItem('cbse_year');
+        }}
+
+        if (urlParams.has('type')) {{
+          state.selectedType = urlParams.get('type');
+        }} else if (localStorage.getItem('cbse_type')) {{
+          state.selectedType = localStorage.getItem('cbse_type');
+        }}
+
+        if (urlParams.has('status')) {{
+          state.selectedStudyStatus = urlParams.get('status');
+        }} else if (localStorage.getItem('cbse_study_status')) {{
+          state.selectedStudyStatus = localStorage.getItem('cbse_study_status');
+        }}
+
+        if (urlParams.has('sort')) {{
+          state.sortBy = urlParams.get('sort');
+        }} else if (localStorage.getItem('cbse_sort_by')) {{
+          state.sortBy = localStorage.getItem('cbse_sort_by');
+        }}
+
+        if (urlParams.has('paired')) {{
+          state.pairedOnly = urlParams.get('paired') === '1' || urlParams.get('paired') === 'true';
+        }} else if (localStorage.getItem('cbse_paired_only') !== null) {{
+          state.pairedOnly = localStorage.getItem('cbse_paired_only') === 'true';
+        }}
+
+        if (urlParams.has('view')) {{
+          state.viewMode = urlParams.get('view');
+        }} else if (localStorage.getItem('cbse_view_mode')) {{
+          state.viewMode = localStorage.getItem('cbse_view_mode');
+        }}
+
+        if (urlParams.has('q')) {{
+          state.searchQuery = urlParams.get('q');
+        }}
+
+        if (urlParams.has('split')) {{
+          state.splitMode = urlParams.get('split');
+        }} else if (localStorage.getItem('cbse_split_mode')) {{
+          state.splitMode = localStorage.getItem('cbse_split_mode');
+        }}
+
+        if (urlParams.has('tab')) {{
+          state.activeMobileTab = urlParams.get('tab');
+        }} else if (localStorage.getItem('cbse_active_mobile_tab')) {{
+          state.activeMobileTab = localStorage.getItem('cbse_active_mobile_tab');
+        }}
+      }}
+
+      function syncFilterControls() {{
+        if (dom.studyStatusFilter) dom.studyStatusFilter.value = state.selectedStudyStatus;
+        if (dom.sortSelect) dom.sortSelect.value = state.sortBy;
+        if (dom.pairedOnlyToggle) dom.pairedOnlyToggle.checked = state.pairedOnly;
+        if (dom.viewModeIcon) dom.viewModeIcon.textContent = state.viewMode === 'grid' ? '⊞' : '☰';
+
+        document.querySelectorAll('.subject-pill').forEach(pill => {{
+          if (pill.getAttribute('data-subject') === state.selectedSubject) {{
+            pill.classList.add('active');
+            try {{ pill.scrollIntoView({{ inline: 'nearest', block: 'nearest' }}); }} catch (e) {{}}
+          }} else {{
+            pill.classList.remove('active');
+          }}
+        }});
+
+        dom.yearChipGroup.querySelectorAll('.chip').forEach(chip => {{
+          if (chip.getAttribute('data-year') === state.selectedYear) {{
+            chip.classList.add('active');
+          }} else {{
+            chip.classList.remove('active');
+          }}
+        }});
+
+        dom.typeChipGroup.querySelectorAll('.chip').forEach(chip => {{
+          if (chip.getAttribute('data-type') === state.selectedType) {{
+            chip.classList.add('active');
+          }} else {{
+            chip.classList.remove('active');
+          }}
+        }});
+      }}
+
+      function restoreOpenDocuments() {{
+        const urlParams = getUrlParams();
+        const docIdFromUrl = urlParams.get('doc');
+        const docIdFromStorage = localStorage.getItem('cbse_workbench_open') === 'true' 
+          ? localStorage.getItem('cbse_active_doc_id') 
+          : null;
+
+        const targetDocId = docIdFromUrl || docIdFromStorage;
+
+        if (targetDocId) {{
+          const rightId = urlParams.get('right') || localStorage.getItem('cbse_active_right_id');
+          const isSplit = !!rightId || urlParams.get('split') !== null;
+          openWorkbench(targetDocId, isSplit, false, rightId);
+          return;
+        }}
+
+        if (urlParams.get('map') === '1' || localStorage.getItem('cbse_map_open') === 'true') {{
+          openMapModal(false);
+        }}
+      }}
+
+      // Save & Update Completed Documents
+      function saveCompletedDocs() {{
+        localStorage.setItem('cbse_completed_docs', JSON.stringify(Array.from(state.completedDocs)));
+        updateProgressMetrics();
+      }}
+
+      function toggleDocCompletion(id) {{
+        if (state.completedDocs.has(id)) {{
+          state.completedDocs.delete(id);
+        }} else {{
+          state.completedDocs.add(id);
+        }}
+        saveCompletedDocs();
+        renderMaterials();
+        updateWorkbenchDoneBtn();
+      }}
+
+      function updateProgressMetrics() {{
+        const total = state.allMaterials.length;
+        const completedCount = state.completedDocs.size;
+        const pct = total > 0 ? ((completedCount / total) * 100).toFixed(1) : 0;
+
+        dom.progressSummaryText.textContent = `${{completedCount}} / ${{total}} (${{pct}}%)`;
+        dom.progressBarFill.style.width = `${{pct}}%`;
+
+        dom.studyStatusFilter.options[0].textContent = `Status: All (${{total}})`;
+        dom.studyStatusFilter.options[1].textContent = `Status: ⬜ Unfinished (${{total - completedCount}})`;
+        dom.studyStatusFilter.options[2].textContent = `Status: ✅ Completed (${{completedCount}})`;
+      }}
+
+      // PDF URL Resolver for Mozilla PDF.js & Storage
+      function getRawPdfUrl(relPath) {{
+        if (state.pdfSource === 'github_raw') {{
+          return `https://raw.githubusercontent.com/${{GITHUB_USER}}/${{GITHUB_REPO}}/${{GITHUB_BRANCH}}/${{encodeURI(relPath)}}`;
+        }} else if (state.pdfSource === 'jsdelivr') {{
+          return `https://cdn.jsdelivr.net/gh/${{GITHUB_USER}}/${{GITHUB_REPO}}@${{GITHUB_BRANCH}}/${{encodeURI(relPath)}}`;
+        }} else {{
+          // Local server / current origin
+          return window.location.origin + '/' + encodeURI(relPath);
+        }}
+      }}
+
+      function buildViewerUrl(relPath) {{
+        const rawUrl = getRawPdfUrl(relPath);
+        if (state.viewerEngine === 'native') {{
+          return rawUrl;
+        }}
+        // Mozilla PDF.js hosted viewer
+        return `${{MOZILLA_VIEWER_BASE}}?file=${{encodeURIComponent(rawUrl)}}`;
+      }}
+
+      // Sync settings dropdowns
+      dom.viewerEngineSelect.value = state.viewerEngine;
+      dom.pdfSourceSelect.value = state.pdfSource;
+
+      dom.viewerEngineSelect.addEventListener('change', (e) => {{
+        state.viewerEngine = e.target.value;
+        localStorage.setItem('cbse_viewer_engine', state.viewerEngine);
+        reloadWorkbenchIframes();
+      }});
+
+      dom.pdfSourceSelect.addEventListener('change', (e) => {{
+        state.pdfSource = e.target.value;
+        localStorage.setItem('cbse_pdf_source', state.pdfSource);
+        reloadWorkbenchIframes();
+      }});
+
+      function reloadWorkbenchIframes() {{
+        if (state.activeLeftItem) {{
+          dom.leftIframe.src = buildViewerUrl(state.activeLeftItem.rel_path);
+          dom.leftDownloadLink.href = getRawPdfUrl(state.activeLeftItem.rel_path);
+        }}
+        if (state.activeRightItem) {{
+          dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
+          dom.rightDownloadLink.href = getRawPdfUrl(state.activeRightItem.rel_path);
+        }}
+      }}
+
+      // Theme toggle
       function applyTheme(theme) {{
         document.documentElement.setAttribute('data-theme', theme);
         dom.themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        dom.bottomNavThemeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
         localStorage.setItem('cbse_theme', theme);
         state.theme = theme;
       }}
@@ -1376,8 +2120,33 @@ def build():
       dom.themeToggleBtn.addEventListener('click', () => {{
         applyTheme(state.theme === 'dark' ? 'light' : 'dark');
       }});
+      dom.bottomNavTheme.addEventListener('click', () => {{
+        applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+      }});
 
-      // Build Sidebar Category List
+      // Mobile Drawer Controls
+      function openDrawer() {{
+        dom.sidebarDrawer.classList.add('drawer-open');
+        dom.drawerBackdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }}
+
+      function closeDrawer() {{
+        dom.sidebarDrawer.classList.remove('drawer-open');
+        dom.drawerBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      }}
+
+      dom.mobileDrawerBtn.addEventListener('click', openDrawer);
+      dom.closeDrawerBtn.addEventListener('click', closeDrawer);
+      dom.drawerBackdrop.addEventListener('click', closeDrawer);
+      dom.bottomNavFilters.addEventListener('click', openDrawer);
+
+      dom.bottomNavTop.addEventListener('click', () => {{
+        dom.stageScrollArea.scrollTo({{ top: 0, behavior: 'smooth' }});
+      }});
+
+      // Render Categories
       function renderCategoryNav() {{
         dom.categoryNavList.innerHTML = '';
         categoryMetadata.forEach(cat => {{
@@ -1396,8 +2165,11 @@ def build():
           `;
           div.addEventListener('click', () => {{
             state.selectedCategory = cat.id;
+            localStorage.setItem('cbse_category', state.selectedCategory);
+            updateUrl(false);
             renderCategoryNav();
             renderMaterials();
+            if (window.innerWidth <= 900) closeDrawer();
           }});
           dom.categoryNavList.appendChild(div);
         }});
@@ -1406,7 +2178,6 @@ def build():
       // Filter Logic
       function getFilteredMaterials() {{
         return state.allMaterials.filter(m => {{
-          // Exclude raw bundle zips or covers from direct list if desired, or keep all
           if (m.type === 'cover_image') return false;
 
           if (state.selectedSubject !== 'All' && m.subject !== state.selectedSubject) return false;
@@ -1414,6 +2185,11 @@ def build():
           if (state.selectedYear !== 'All' && m.year !== state.selectedYear) return false;
           if (state.selectedType !== 'All' && m.type !== state.selectedType) return false;
           if (state.pairedOnly && !m.paired_id) return false;
+
+          // Study Completion Status Filter
+          const isDone = state.completedDocs.has(m.id);
+          if (state.selectedStudyStatus === 'unfinished' && isDone) return false;
+          if (state.selectedStudyStatus === 'completed' && !isDone) return false;
 
           if (state.searchQuery) {{
             const q = state.searchQuery.toLowerCase();
@@ -1433,7 +2209,6 @@ def build():
         }});
       }}
 
-      // Subject tag class mapping
       function getSubjectTagClass(subj) {{
         const map = {{
           'Mathematics': 'tag-subject-math',
@@ -1463,12 +2238,10 @@ def build():
         return map[type] || 'Document';
       }}
 
-      // Render Materials Grid and Table
       function renderMaterials() {{
         const items = getFilteredMaterials();
         dom.resultsCountBadge.textContent = `${{items.length}} items`;
 
-        // Update active summary text
         const subjText = state.selectedSubject === 'All' ? 'All Subjects' : state.selectedSubject;
         const catText = state.selectedCategory === 'All' ? 'All Categories' : state.selectedCategory;
         const yearText = state.selectedYear === 'All' ? '' : ` • ${{state.selectedYear}}`;
@@ -1481,10 +2254,10 @@ def build():
 
           if (items.length === 0) {{
             dom.materialsGrid.innerHTML = `
-              <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+              <div style="grid-column: 1/-1; text-align: center; padding: 50px 16px; color: var(--text-muted);">
                 <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--text-secondary);">No documents match your filters</div>
-                <div style="font-size: 13px; margin-top: 6px;">Try clearing some filters or searching for different keywords</div>
+                <div style="font-size: 13px; margin-top: 6px;">Try adjusting filters or clearing status filters</div>
               </div>
             `;
             return;
@@ -1492,7 +2265,8 @@ def build():
 
           items.forEach(item => {{
             const card = document.createElement('div');
-            card.className = `card ${{item.paired_id ? 'paired' : ''}}`;
+            const isCompleted = state.completedDocs.has(item.id);
+            card.className = `card ${{item.paired_id ? 'paired' : ''}} ${{isCompleted ? 'is-completed' : ''}}`;
 
             const hasPair = !!item.paired_id;
             const splitBtnHtml = hasPair 
@@ -1506,6 +2280,7 @@ def build():
                   ${{item.year ? `<span class="tag tag-year">${{item.year}}</span>` : ''}}
                   ${{item.set_code ? `<span class="tag tag-year">${{item.set_code}}</span>` : ''}}
                   <span class="tag tag-type">${{getCleanTypeLabel(item.type)}}</span>
+                  ${{isCompleted ? `<span class="tag tag-completed">✔ Completed</span>` : ''}}
                 </div>
               </div>
 
@@ -1519,7 +2294,10 @@ def build():
               <div class="card-actions">
                 ${{splitBtnHtml}}
                 <button class="btn btn-primary open-single-btn" data-id="${{item.id}}">👁️ View</button>
-                <a href="${{item.rel_path}}" target="_blank" download class="btn btn-secondary">⬇</a>
+                <button class="btn btn-done toggle-done-btn ${{isCompleted ? 'done' : ''}}" data-id="${{item.id}}" title="Toggle complete status">
+                  ${{isCompleted ? '✅ Done' : '⬜ Mark Done'}}
+                </button>
+                <a href="${{getRawPdfUrl(item.rel_path)}}" target="_blank" download class="btn btn-secondary" title="Download file">⬇</a>
               </div>
             `;
 
@@ -1531,8 +2309,14 @@ def build():
           dom.materialsTableBody.innerHTML = '';
 
           items.forEach(item => {{
+            const isCompleted = state.completedDocs.has(item.id);
             const tr = document.createElement('tr');
             tr.innerHTML = `
+              <td>
+                <button class="btn btn-done toggle-done-btn ${{isCompleted ? 'done' : ''}}" data-id="${{item.id}}" style="padding: 2px 6px; font-size: 10px;">
+                  ${{isCompleted ? '✅' : '⬜'}}
+                </button>
+              </td>
               <td>
                 <div style="font-weight: 600; color: var(--text-primary);">${{item.title}}</div>
                 <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${{item.filename}}</div>
@@ -1545,7 +2329,7 @@ def build():
                 <div style="display: flex; gap: 6px;">
                   ${{item.paired_id ? `<button class="btn btn-split open-split-btn" data-id="${{item.id}}" style="padding: 4px 8px; font-size: 11px;">⚡ Split</button>` : ''}}
                   <button class="btn btn-primary open-single-btn" data-id="${{item.id}}" style="padding: 4px 8px; font-size: 11px;">View</button>
-                  <a href="${{item.rel_path}}" target="_blank" download class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">⬇</a>
+                  <a href="${{getRawPdfUrl(item.rel_path)}}" target="_blank" download class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">⬇</a>
                 </div>
               </td>
             `;
@@ -1553,64 +2337,145 @@ def build():
           }});
         }}
 
-        // Attach Card Button Listeners
+        // Card button events
         document.querySelectorAll('.open-split-btn').forEach(b => {{
           b.addEventListener('click', (e) => {{
             const id = e.currentTarget.getAttribute('data-id');
-            openWorkbench(id, true);
+            openWorkbench(id, true, true);
           }});
         }});
 
         document.querySelectorAll('.open-single-btn').forEach(b => {{
           b.addEventListener('click', (e) => {{
             const id = e.currentTarget.getAttribute('data-id');
-            openWorkbench(id, false);
+            openWorkbench(id, false, true);
+          }});
+        }});
+
+        document.querySelectorAll('.toggle-done-btn').forEach(b => {{
+          b.addEventListener('click', (e) => {{
+            const id = e.currentTarget.getAttribute('data-id');
+            toggleDocCompletion(id);
           }});
         }});
       }}
 
       // ============================================================
-      // DUAL-PANE SPLIT WORKBENCH LOGIC
+      // WORKBENCH LOGIC (MOZILLA PDF.JS VIEWER INTEGRATED)
       // ============================================================
-      function openWorkbench(itemId, isSplit) {{
+      function updateWorkbenchDoneBtn() {{
+        if (!state.activeLeftItem) return;
+        const isDone = state.completedDocs.has(state.activeLeftItem.id);
+        dom.workbenchMarkDoneBtn.textContent = isDone ? '✅ Completed' : '⬜ Mark Complete';
+        if (isDone) dom.workbenchMarkDoneBtn.classList.add('done');
+        else dom.workbenchMarkDoneBtn.classList.remove('done');
+      }}
+
+      dom.workbenchMarkDoneBtn.addEventListener('click', () => {{
+        if (state.activeLeftItem) {{
+          toggleDocCompletion(state.activeLeftItem.id);
+        }}
+      }});
+
+      function openWorkbench(itemId, isSplit, pushHistory = true, rightItemId = null) {{
         const primary = state.allMaterials.find(m => m.id === itemId);
         if (!primary) return;
 
         state.activeLeftItem = primary;
         dom.leftDocTitle.textContent = primary.title;
-        dom.leftIframe.src = primary.rel_path;
-        dom.leftDownloadLink.href = primary.rel_path;
+        dom.leftIframe.src = buildViewerUrl(primary.rel_path);
+        dom.leftDownloadLink.href = getRawPdfUrl(primary.rel_path);
 
-        // Populate companion dropdown with matching Topper copies or paired schemes
+        updateWorkbenchDoneBtn();
         populateCompanionDropdown(primary);
 
-        if (isSplit && primary.paired_id) {{
+        const isMobile = window.innerWidth <= 640;
+
+        if (rightItemId) {{
+          const specifiedRight = state.allMaterials.find(m => m.id === rightItemId);
+          if (specifiedRight) {{
+            state.activeRightItem = specifiedRight;
+            dom.rightDocTitle.textContent = specifiedRight.title;
+            dom.rightIframe.src = buildViewerUrl(specifiedRight.rel_path);
+            dom.rightDownloadLink.href = getRawPdfUrl(specifiedRight.rel_path);
+            dom.companionSelector.value = specifiedRight.id;
+          }}
+        }} else if (isSplit && primary.paired_id) {{
           const paired = state.allMaterials.find(m => m.id === primary.paired_id);
           if (paired) {{
             state.activeRightItem = paired;
             dom.rightDocTitle.textContent = paired.title;
-            dom.rightIframe.src = paired.rel_path;
-            dom.rightDownloadLink.href = paired.rel_path;
-            setSplitPreset('50-50');
+            dom.rightIframe.src = buildViewerUrl(paired.rel_path);
+            dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
+            dom.companionSelector.value = paired.id;
           }}
+        }} else if (primary.paired_id) {{
+          const paired = state.allMaterials.find(m => m.id === primary.paired_id);
+          state.activeRightItem = paired;
+          dom.rightDocTitle.textContent = paired.title;
+          dom.rightIframe.src = buildViewerUrl(paired.rel_path);
+          dom.rightDownloadLink.href = getRawPdfUrl(paired.rel_path);
+          dom.companionSelector.value = paired.id;
         }} else {{
-          // Default right pane to either paired, topper copy, or exemplar solution
-          if (primary.paired_id) {{
-            const paired = state.allMaterials.find(m => m.id === primary.paired_id);
-            state.activeRightItem = paired;
-            dom.rightDocTitle.textContent = paired.title;
-            dom.rightIframe.src = paired.rel_path;
-            dom.rightDownloadLink.href = paired.rel_path;
-            setSplitPreset('50-50');
+          state.activeRightItem = null;
+        }}
+
+        if (isMobile) {{
+          switchMobileTab(state.activeMobileTab || 'left');
+        }} else {{
+          if (state.activeRightItem) {{
+            setSplitPreset(state.splitMode || '50-50');
           }} else {{
-            // Single document focus
-            state.activeRightItem = null;
             setSplitPreset('left-focus');
           }}
         }}
 
         dom.splitWorkbench.classList.add('active');
+        document.body.style.overflow = 'hidden';
+
+        // Persist to localStorage
+        localStorage.setItem('cbse_workbench_open', 'true');
+        localStorage.setItem('cbse_active_doc_id', primary.id);
+        if (state.activeRightItem) {{
+          localStorage.setItem('cbse_active_right_id', state.activeRightItem.id);
+        }} else {{
+          localStorage.removeItem('cbse_active_right_id');
+        }}
+        localStorage.setItem('cbse_split_mode', state.splitMode);
+        localStorage.setItem('cbse_active_mobile_tab', state.activeMobileTab);
+
+        // Synchronize URL
+        updateUrl(pushHistory);
       }}
+
+      function switchMobileTab(tab) {{
+        state.activeMobileTab = tab;
+        localStorage.setItem('cbse_active_mobile_tab', tab);
+        updateUrl(false);
+        if (tab === 'left') {{
+          dom.mobileTabLeft.classList.add('active');
+          dom.mobileTabRight.classList.remove('active');
+          dom.leftPane.style.width = '100%';
+          dom.leftPane.style.display = 'flex';
+          dom.rightPane.style.width = '0%';
+          dom.rightPane.style.display = 'none';
+          dom.mobileFlipBtn.textContent = '⚡ Switch to Solution ➔';
+        }} else {{
+          dom.mobileTabRight.classList.add('active');
+          dom.mobileTabLeft.classList.remove('active');
+          dom.rightPane.style.width = '100%';
+          dom.rightPane.style.display = 'flex';
+          dom.leftPane.style.width = '0%';
+          dom.leftPane.style.display = 'none';
+          dom.mobileFlipBtn.textContent = '⬅ Back to Question Paper';
+        }}
+      }}
+
+      dom.mobileTabLeft.addEventListener('click', () => switchMobileTab('left'));
+      dom.mobileTabRight.addEventListener('click', () => switchMobileTab('right'));
+      dom.mobileFlipBtn.addEventListener('click', () => {{
+        switchMobileTab(state.activeMobileTab === 'left' ? 'right' : 'left');
+      }});
 
       function populateCompanionDropdown(primary) {{
         dom.companionSelector.innerHTML = '';
@@ -1618,11 +2483,10 @@ def build():
         if (primary.paired_id) {{
           const opt = document.createElement('option');
           opt.value = primary.paired_id;
-          opt.textContent = `🎯 Paired Solution: ${{primary.paired_title || 'Official Marking Scheme'}}`;
+          opt.textContent = `🎯 Paired: ${{primary.paired_title || 'Official Marking Scheme'}}`;
           dom.companionSelector.appendChild(opt);
         }}
 
-        // Find topper scripts for this subject
         const toppers = state.allMaterials.filter(m => m.type === 'topper_script' && m.subject === primary.subject);
         toppers.forEach(t => {{
           const opt = document.createElement('option');
@@ -1631,7 +2495,6 @@ def build():
           dom.companionSelector.appendChild(opt);
         }});
 
-        // If exemplar, add exemplar solutions
         if (primary.category === 'NCERT Exemplar') {{
           const sol = state.allMaterials.find(m => m.type === 'exemplar_solution' && m.subject === primary.subject);
           if (sol) {{
@@ -1657,23 +2520,39 @@ def build():
         if (targetDoc) {{
           state.activeRightItem = targetDoc;
           dom.rightDocTitle.textContent = targetDoc.title;
-          dom.rightIframe.src = targetDoc.rel_path;
-          dom.rightDownloadLink.href = targetDoc.rel_path;
-          setSplitPreset('50-50');
+          dom.rightIframe.src = buildViewerUrl(targetDoc.rel_path);
+          dom.rightDownloadLink.href = getRawPdfUrl(targetDoc.rel_path);
+          localStorage.setItem('cbse_active_right_id', targetDoc.id);
+          updateUrl(false);
+          if (window.innerWidth <= 640) switchMobileTab('right');
+          else setSplitPreset('50-50');
         }}
       }});
 
-      function closeWorkbench() {{
+      function closeWorkbench(updateHistory = true) {{
         dom.splitWorkbench.classList.remove('active');
         dom.leftIframe.src = 'about:blank';
         dom.rightIframe.src = 'about:blank';
+        document.body.style.overflow = '';
+
+        state.activeLeftItem = null;
+        state.activeRightItem = null;
+
+        localStorage.setItem('cbse_workbench_open', 'false');
+        localStorage.removeItem('cbse_active_doc_id');
+        localStorage.removeItem('cbse_active_right_id');
+
+        if (updateHistory) {{
+          updateUrl(false);
+        }}
       }}
 
-      dom.closeWorkbenchBtn.addEventListener('click', closeWorkbench);
+      dom.closeWorkbenchBtn.addEventListener('click', () => closeWorkbench(true));
 
-      // Split Presets
       function setSplitPreset(preset) {{
         state.splitMode = preset;
+        localStorage.setItem('cbse_split_mode', preset);
+        updateUrl(false);
         if (preset === '50-50') {{
           dom.leftPane.style.width = '50%';
           dom.rightPane.style.width = '50%';
@@ -1703,34 +2582,42 @@ def build():
         state.activeRightItem = temp;
 
         dom.leftDocTitle.textContent = state.activeLeftItem.title;
-        dom.leftIframe.src = state.activeLeftItem.rel_path;
-        dom.leftDownloadLink.href = state.activeLeftItem.rel_path;
+        dom.leftIframe.src = buildViewerUrl(state.activeLeftItem.rel_path);
+        dom.leftDownloadLink.href = getRawPdfUrl(state.activeLeftItem.rel_path);
 
         dom.rightDocTitle.textContent = state.activeRightItem.title;
-        dom.rightIframe.src = state.activeRightItem.rel_path;
-        dom.rightDownloadLink.href = state.activeRightItem.rel_path;
+        dom.rightIframe.src = buildViewerUrl(state.activeRightItem.rel_path);
+        dom.rightDownloadLink.href = getRawPdfUrl(state.activeRightItem.rel_path);
+
+        localStorage.setItem('cbse_active_doc_id', state.activeLeftItem.id);
+        localStorage.setItem('cbse_active_right_id', state.activeRightItem.id);
+        updateUrl(false);
+
+        updateWorkbenchDoneBtn();
       }});
 
       dom.popoutBtn.addEventListener('click', () => {{
-        if (state.activeLeftItem) window.open(state.activeLeftItem.rel_path, '_blank');
-        if (state.activeRightItem) window.open(state.activeRightItem.rel_path, '_blank');
+        if (state.activeLeftItem) window.open(buildViewerUrl(state.activeLeftItem.rel_path), '_blank');
+        if (state.activeRightItem) window.open(buildViewerUrl(state.activeRightItem.rel_path), '_blank');
       }});
 
-      // ============================================================
-      // OMNI-SEARCH MODAL (Ctrl + K)
-      // ============================================================
+      // Omni-Search
       function openOmniSearch() {{
         dom.searchModal.classList.add('active');
         dom.omniSearchInput.value = '';
         renderOmniResults('');
         dom.omniSearchInput.focus();
+        document.body.style.overflow = 'hidden';
       }}
 
       function closeOmniSearch() {{
         dom.searchModal.classList.remove('active');
+        document.body.style.overflow = '';
       }}
 
       dom.openOmniSearch.addEventListener('click', openOmniSearch);
+      dom.bottomNavSearch.addEventListener('click', openOmniSearch);
+      dom.closeSearchModalBtn.addEventListener('click', closeOmniSearch);
 
       function renderOmniResults(q) {{
         const query = q.toLowerCase().trim();
@@ -1747,24 +2634,26 @@ def build():
         dom.searchResultsList.innerHTML = '';
 
         matches.forEach((m, idx) => {{
+          const isDone = state.completedDocs.has(m.id);
           const item = document.createElement('div');
           item.className = `search-result-item ${{idx === 0 ? 'highlighted' : ''}}`;
           item.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
-              <span class="tag ${{getSubjectTagClass(m.subject)}}">${{m.subject}}</span>
+            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; min-width: 0;">
+              <span class="tag ${{getSubjectTagClass(m.subject)}}" style="font-size: 9px;">${{m.subject}}</span>
               <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <div style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${{m.title}}</div>
                 <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${{m.rel_path}}</div>
               </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-              ${{m.paired_id ? `<span style="font-size: 11px; color: var(--accent-emerald); font-weight: 600;">⚡ Split Ready</span>` : ''}}
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              ${{isDone ? `<span style="font-size: 10px; color: var(--accent-emerald);">✔ Done</span>` : ''}}
+              ${{m.paired_id ? `<span style="font-size: 10px; color: var(--accent-emerald); font-weight: 700;">⚡ Paired</span>` : ''}}
               <span class="tag tag-year">${{m.year || 'Doc'}}</span>
             </div>
           `;
           item.addEventListener('click', () => {{
             closeOmniSearch();
-            openWorkbench(m.id, !!m.paired_id);
+            openWorkbench(m.id, !!m.paired_id, true);
           }});
           dom.searchResultsList.appendChild(item);
         }});
@@ -1774,7 +2663,6 @@ def build():
         renderOmniResults(e.target.value);
       }});
 
-      // Global Keyboard Shortcuts
       window.addEventListener('keydown', (e) => {{
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {{
           e.preventDefault();
@@ -1783,8 +2671,9 @@ def build():
         }}
         if (e.key === 'Escape') {{
           if (dom.searchModal.classList.contains('active')) closeOmniSearch();
-          if (dom.splitWorkbench.classList.contains('active')) closeWorkbench();
-          if (dom.mapModal.classList.contains('active')) dom.mapModal.classList.remove('active');
+          if (dom.splitWorkbench.classList.contains('active')) closeWorkbench(true);
+          if (dom.mapModal.classList.contains('active')) closeMapModal(true);
+          closeDrawer();
         }}
       }});
 
@@ -1792,11 +2681,8 @@ def build():
         if (e.target === dom.searchModal) closeOmniSearch();
       }});
 
-      // ============================================================
-      // MAP WORK MODAL RENDERING
-      // ============================================================
+      // Map Work Markdown parser
       function parseMarkdownToHtml(md) {{
-        // Basic clean parser for tables, headings, and lists
         let html = md
           .replace(/^### (.*$)/gim, '<h3>$1</h3>')
           .replace(/^## (.*$)/gim, '<h2>$1</h2>')
@@ -1804,7 +2690,6 @@ def build():
           .replace(/\\*\\*(.*?)\\*\\*/gim, '<strong>$1</strong>')
           .replace(/\\*(.*?)\\*/gim, '<em>$1</em>');
 
-        // Parse tables
         const lines = html.split('\\n');
         let inTable = false;
         let tableHtml = '';
@@ -1815,7 +2700,7 @@ def build():
           if (line.startsWith('|') && line.endsWith('|')) {{
             if (!inTable) {{
               inTable = true;
-              tableHtml = '<table><thead>';
+              tableHtml = '<div class="map-table-wrap"><table><thead>';
             }}
             const cells = line.split('|').slice(1, -1).map(c => c.trim());
             if (line.includes('---')) {{
@@ -1828,7 +2713,7 @@ def build():
           }} else {{
             if (inTable) {{
               inTable = false;
-              tableHtml += '</tbody></table>';
+              tableHtml += '</tbody></table></div>';
               parsedLines.push(tableHtml);
               tableHtml = '';
             }}
@@ -1836,34 +2721,49 @@ def build():
           }}
         }}
         if (inTable) {{
-          tableHtml += '</tbody></table>';
+          tableHtml += '</tbody></table></div>';
           parsedLines.push(tableHtml);
         }}
 
         return parsedLines.join('<br>');
       }}
 
-      dom.openMapWorkBtn.addEventListener('click', () => {{
+      function openMapModal(pushHistory = true) {{
         dom.mapContentArea.innerHTML = parseMarkdownToHtml(window.__MAP_GUIDE_MD__);
         dom.mapModal.classList.add('active');
-      }});
+        document.body.style.overflow = 'hidden';
+        localStorage.setItem('cbse_map_open', 'true');
+        updateUrl(pushHistory);
+      }}
 
-      dom.closeMapModalBtn.addEventListener('click', () => {{
+      function closeMapModal(updateHistory = true) {{
         dom.mapModal.classList.remove('active');
-      }});
+        document.body.style.overflow = '';
+        localStorage.setItem('cbse_map_open', 'false');
+        if (updateHistory) {{
+          updateUrl(false);
+        }}
+      }}
+
+      dom.openMapWorkBtn.addEventListener('click', () => openMapModal(true));
+      dom.bottomNavMap.addEventListener('click', () => openMapModal(true));
+
+      dom.closeMapModalBtn.addEventListener('click', () => closeMapModal(true));
       dom.mapModal.addEventListener('click', (e) => {{
-        if (e.target === dom.mapModal) dom.mapModal.classList.remove('active');
+        if (e.target === dom.mapModal) {{
+          closeMapModal(true);
+        }}
       }});
 
-      // ============================================================
-      // EVENT LISTENERS & FILTER WIRING
-      // ============================================================
+      // Filter Handlers
       dom.subjectBar.addEventListener('click', (e) => {{
         const pill = e.target.closest('.subject-pill');
         if (!pill) return;
         document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
         state.selectedSubject = pill.getAttribute('data-subject');
+        localStorage.setItem('cbse_subject', state.selectedSubject);
+        updateUrl(false);
         renderMaterials();
       }});
 
@@ -1873,7 +2773,10 @@ def build():
         dom.yearChipGroup.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.selectedYear = chip.getAttribute('data-year');
+        localStorage.setItem('cbse_year', state.selectedYear);
+        updateUrl(false);
         renderMaterials();
+        if (window.innerWidth <= 900) closeDrawer();
       }});
 
       dom.typeChipGroup.addEventListener('click', (e) => {{
@@ -1882,28 +2785,96 @@ def build():
         dom.typeChipGroup.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.selectedType = chip.getAttribute('data-type');
+        localStorage.setItem('cbse_type', state.selectedType);
+        updateUrl(false);
+        renderMaterials();
+        if (window.innerWidth <= 900) closeDrawer();
+      }});
+
+      dom.studyStatusFilter.addEventListener('change', (e) => {{
+        state.selectedStudyStatus = e.target.value;
+        localStorage.setItem('cbse_study_status', state.selectedStudyStatus);
+        updateUrl(false);
         renderMaterials();
       }});
 
       dom.pairedOnlyToggle.addEventListener('change', (e) => {{
         state.pairedOnly = e.target.checked;
+        localStorage.setItem('cbse_paired_only', state.pairedOnly);
+        updateUrl(false);
         renderMaterials();
       }});
 
       dom.sortSelect.addEventListener('change', (e) => {{
         state.sortBy = e.target.value;
+        localStorage.setItem('cbse_sort_by', state.sortBy);
+        updateUrl(false);
         renderMaterials();
       }});
 
       dom.viewModeToggle.addEventListener('click', () => {{
         state.viewMode = state.viewMode === 'grid' ? 'table' : 'grid';
         dom.viewModeIcon.textContent = state.viewMode === 'grid' ? '⊞' : '☰';
+        localStorage.setItem('cbse_view_mode', state.viewMode);
+        updateUrl(false);
         renderMaterials();
       }});
 
+      // Browser History PopState & HashChange Navigation
+      function onHistoryNavigation() {{
+        const params = getUrlParams();
+
+        state.selectedSubject = params.get('subject') || 'All';
+        state.selectedCategory = params.get('category') || 'All';
+        state.selectedYear = params.get('year') || 'All';
+        state.selectedType = params.get('type') || 'All';
+        state.selectedStudyStatus = params.get('status') || 'all';
+        state.sortBy = params.get('sort') || 'year_desc';
+        state.pairedOnly = params.get('paired') === '1' || params.get('paired') === 'true';
+        state.viewMode = params.get('view') || 'grid';
+        state.searchQuery = params.get('q') || '';
+
+        syncFilterControls();
+        renderCategoryNav();
+        renderMaterials();
+
+        const docId = params.get('doc');
+        if (docId) {{
+          const rightId = params.get('right');
+          const isSplit = !!rightId || params.get('split') !== null;
+          if (params.get('split')) state.splitMode = params.get('split');
+          if (params.get('tab')) state.activeMobileTab = params.get('tab');
+          if (!dom.splitWorkbench.classList.contains('active') || !state.activeLeftItem || state.activeLeftItem.id !== docId) {{
+            openWorkbench(docId, isSplit, false, rightId);
+          }}
+        }} else {{
+          if (dom.splitWorkbench.classList.contains('active')) {{
+            closeWorkbench(false);
+          }}
+        }}
+
+        if (params.get('map') === '1') {{
+          if (!dom.mapModal.classList.contains('active')) {{
+            openMapModal(false);
+          }}
+        }} else {{
+          if (dom.mapModal.classList.contains('active')) {{
+            closeMapModal(false);
+          }}
+        }}
+      }}
+
+      window.addEventListener('popstate', onHistoryNavigation);
+      window.addEventListener('hashchange', onHistoryNavigation);
+
       // Initial Bootstrap
+      initNavigationAndState();
+      syncFilterControls();
       renderCategoryNav();
+      updateProgressMetrics();
       renderMaterials();
+      restoreOpenDocuments();
+      updateUrl(false);
 
     }})();
   </script>
@@ -1920,7 +2891,7 @@ def build():
         os.makedirs(os.path.dirname(target), exist_ok=True)
         with open(target, "w", encoding="utf-8") as f:
             f.write(html_content)
-        print(f"Website successfully written to {target} ({len(html_content)} bytes)")
+        print(f"Website successfully compiled to {target} ({len(html_content)} bytes)")
 
 if __name__ == "__main__":
     build()
