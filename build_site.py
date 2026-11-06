@@ -1481,18 +1481,25 @@ def build():
       gap: 18px;
     }}
 
+    .datesheet-content > * {{
+      flex-shrink: 0;
+    }}
+
     /* Hero Countdown Section */
     .datesheet-hero {{
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(16, 185, 129, 0.1) 100%);
-      border: 1px solid rgba(99, 102, 241, 0.3);
+      flex-shrink: 0 !important;
+      min-height: 120px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(16, 185, 129, 0.12) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
       border-radius: var(--radius-md);
-      padding: 18px 20px;
+      padding: 18px 22px;
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 18px;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 20px;
       align-items: center;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }}
 
     .datesheet-hero::after {{
@@ -1504,12 +1511,14 @@ def build():
       height: 260px;
       background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
       pointer-events: none;
+      border-radius: 50%;
     }}
 
     .hero-clock-box {{
       display: flex;
       flex-direction: column;
       gap: 6px;
+      min-width: 0;
     }}
 
     .hero-label {{
@@ -1524,53 +1533,57 @@ def build():
     }}
 
     .hero-clock-display {{
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
       color: var(--text-primary);
       font-family: var(--font-mono);
       letter-spacing: -0.3px;
+      line-height: 1.2;
+      display: block;
     }}
 
     .hero-exam-milestone {{
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       font-size: 12px;
-      color: var(--accent-indigo);
-      background: var(--accent-indigo-soft);
-      padding: 5px 10px;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.15);
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       width: fit-content;
-      margin-top: 4px;
+      margin-top: 6px;
       font-weight: 600;
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
     }}
 
     .hero-countdown-grid {{
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 10px;
+      min-width: 280px;
     }}
 
     .countdown-card {{
       background: var(--bg-surface);
       border: 1px solid var(--border-medium);
-      border-radius: var(--radius-sm);
-      padding: 10px 4px;
+      border-radius: var(--radius-md);
+      padding: 12px 6px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      min-height: 68px;
     }}
 
     .countdown-val {{
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 800;
       font-family: var(--font-mono);
       color: var(--accent-cyan);
-      line-height: 1.1;
+      line-height: 1;
     }}
 
     .countdown-unit {{
@@ -1578,7 +1591,8 @@ def build():
       font-weight: 700;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-top: 3px;
+      margin-top: 5px;
+      letter-spacing: 0.5px;
     }}
 
     /* Tabs Bar inside modal */
@@ -2115,6 +2129,42 @@ def build():
 
       .map-content {{
         padding: 14px;
+      }}
+
+      .datesheet-modal {{
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-width: 100vw;
+        border-radius: 0;
+      }}
+
+      .datesheet-content {{
+        padding: 14px;
+      }}
+
+      .datesheet-hero {{
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+      }}
+
+      .hero-countdown-grid {{
+        min-width: auto;
+      }}
+
+      .schedule-card {{
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }}
+
+      .schedule-action-col {{
+        align-items: flex-start;
+      }}
+
+      .circular-item {{
+        flex-direction: column;
+        align-items: flex-start;
       }}
     }}
   </style>
