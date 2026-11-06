@@ -1298,6 +1298,666 @@ def build():
       margin-bottom: 16px;
     }}
 
+
+    /* ============================================================
+       DATESHEET & EXAM COUNTDOWN HUB
+       ============================================================ */
+    .btn-datesheet {{
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(6, 182, 212, 0.18));
+      border: 1px solid rgba(99, 102, 241, 0.45);
+      color: #818cf8;
+      font-weight: 700;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: var(--radius-md);
+      transition: var(--transition-fast);
+      cursor: pointer;
+      font-size: 13px;
+      flex-shrink: 0;
+    }}
+
+    .btn-datesheet:hover {{
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(6, 182, 212, 0.35));
+      border-color: #6366f1;
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+      transform: translateY(-1px);
+    }}
+
+    .datesheet-btn-pulse {{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseGreen 1.8s infinite;
+      flex-shrink: 0;
+    }}
+
+    @keyframes pulseGreen {{
+      0%, 100% {{ opacity: 1; transform: scale(1); }}
+      50% {{ opacity: 0.4; transform: scale(1.3); }}
+    }}
+
+    .sidebar-datesheet-box {{
+      padding: 0 16px 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 12px;
+    }}
+
+    .sidebar-datesheet-btn {{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.12));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: var(--transition-fast);
+    }}
+
+    .sidebar-datesheet-btn:hover {{
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.22));
+      border-color: var(--accent-indigo);
+    }}
+
+    .sidebar-datesheet-top {{
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }}
+
+    .sidebar-datesheet-title {{
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }}
+
+    .sidebar-datesheet-sub {{
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+    }}
+
+    /* Datesheet Modal Backdrop & Card */
+    .datesheet-modal-backdrop {{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 200ms ease;
+    }}
+
+    .datesheet-modal-backdrop.active {{
+      display: flex;
+    }}
+
+    .datesheet-modal {{
+      width: 1000px;
+      max-width: 96vw;
+      height: 90vh;
+      height: 90dvh;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(99, 102, 241, 0.2);
+    }}
+
+    .datesheet-header {{
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-subtle);
+      gap: 12px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }}
+
+    .datesheet-title-wrap {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }}
+
+    .datesheet-title-text {{
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+
+    .datesheet-badge-live {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }}
+
+    .datesheet-header-actions {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+
+    .datesheet-content {{
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }}
+
+    /* Hero Countdown Section */
+    .datesheet-hero {{
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 50%, rgba(16, 185, 129, 0.1) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }}
+
+    .datesheet-hero::after {{
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }}
+
+    .hero-clock-box {{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+
+    .hero-label {{
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+
+    .hero-clock-display {{
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      letter-spacing: -0.3px;
+    }}
+
+    .hero-exam-milestone {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--accent-indigo);
+      background: var(--accent-indigo-soft);
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      width: fit-content;
+      margin-top: 4px;
+      font-weight: 600;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }}
+
+    .hero-countdown-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }}
+
+    .countdown-card {{
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      padding: 10px 4px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }}
+
+    .countdown-val {{
+      font-size: 24px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      line-height: 1.1;
+    }}
+
+    .countdown-unit {{
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }}
+
+    /* Tabs Bar inside modal */
+    .datesheet-tabs-bar {{
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }}
+
+    .datesheet-tab-btn {{
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      transition: var(--transition-fast);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }}
+
+    .datesheet-tab-btn:hover {{
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }}
+
+    .datesheet-tab-btn.active {{
+      background: var(--accent-indigo-soft);
+      color: var(--accent-indigo);
+      border-color: rgba(99, 102, 241, 0.35);
+      font-weight: 700;
+    }}
+
+    /* Tab Panes */
+    .datesheet-pane {{
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }}
+
+    .datesheet-pane.active {{
+      display: flex;
+    }}
+
+    /* Schedule Cards */
+    .schedule-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+
+    .schedule-card {{
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 150px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      transition: var(--transition-fast);
+      position: relative;
+    }}
+
+    .schedule-card:hover {{
+      border-color: var(--border-medium);
+      background: var(--bg-elevated);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }}
+
+    .schedule-card.major-focus {{
+      border-left: 4px solid var(--accent-indigo);
+    }}
+
+    .schedule-date-col {{
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }}
+
+    .sched-date {{
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }}
+
+    .sched-day {{
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }}
+
+    .sched-time {{
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }}
+
+    .schedule-info-col {{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+
+    .sched-subject-title {{
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+
+    .sched-code-badge {{
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }}
+
+    .sched-marks-badge {{
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }}
+
+    .sched-gap-row {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+
+    .gap-badge {{
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }}
+
+    .gap-generous {{
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }}
+
+    .gap-moderate {{
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }}
+
+    .gap-start {{
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }}
+
+    .sched-notes {{
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }}
+
+    .schedule-action-col {{
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }}
+
+    /* Timetable Table for All Subjects */
+    .timetable-search-bar {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+    }}
+
+    .timetable-search-bar input {{
+      flex: 1;
+      color: var(--text-primary);
+      font-size: 13px;
+    }}
+
+    .timetable-table-wrap {{
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+    }}
+
+    .timetable-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }}
+
+    .timetable-table th {{
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }}
+
+    .timetable-table td {{
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }}
+
+    .timetable-table tr:hover td {{
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }}
+
+    .timetable-table tr.major-row td {{
+      font-weight: 600;
+      color: var(--text-primary);
+    }}
+
+    /* Gap Strategy Section */
+    .strategy-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }}
+
+    .strategy-card {{
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }}
+
+    .strategy-card-title {{
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+
+    .strategy-card-body {{
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }}
+
+    /* Circulars List */
+    .circular-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+
+    .circular-item {{
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: var(--transition-fast);
+    }}
+
+    .circular-item:hover {{
+      border-color: var(--border-medium);
+      background: var(--bg-elevated);
+    }}
+
+    .circular-info {{
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+
+    .circular-title {{
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }}
+
+    .circular-meta {{
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
+
+    .circular-summary {{
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      margin-top: 2px;
+    }}
+
+    /* Print Styles */
+    @media print {{
+      body * {{
+        visibility: hidden;
+      }}
+      .datesheet-modal-backdrop,
+      .datesheet-modal,
+      .datesheet-modal * {{
+        visibility: visible;
+      }}
+      .datesheet-modal-backdrop {{
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: white !important;
+        padding: 0;
+      }}
+      .datesheet-modal {{
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        color: black !important;
+      }}
+      .datesheet-header-actions,
+      .datesheet-tabs-bar,
+      .schedule-action-col {{
+        display: none !important;
+      }}
+      .schedule-card {{
+        border: 1px solid #ccc !important;
+        background: #fafafa !important;
+        color: black !important;
+        page-break-inside: avoid;
+        margin-bottom: 8px;
+      }}
+    }}
+
     /* ============================================================
        RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
        ============================================================ */
@@ -1308,6 +1968,14 @@ def build():
 
       .mobile-menu-btn {{
         display: flex;
+      }}
+
+      .btn-datesheet span.datesheet-btn-text {{
+        display: none;
+      }}
+
+      .btn-datesheet {{
+        padding: 6px 10px;
       }}
 
       .omni-search-btn {{
@@ -1485,6 +2153,11 @@ def build():
           </div>
         </div>
 
+        <button class="btn btn-datesheet" id="openDatesheetBtn" title="CBSE Class 10 Board Exam Datesheet 2027, Live Countdown & Gap Analysis">
+          <span class="datesheet-btn-pulse"></span>
+          <span class="datesheet-btn-text">📅 Datesheet & Countdown</span>
+        </button>
+
         <button class="btn btn-secondary" id="openMapWorkBtn" title="CBSE Class 10 Social Science Map Work Guide">
           🗺️ Map Work Guide
         </button>
@@ -1538,6 +2211,16 @@ def build():
             <span>⚡ Filters & Categories</span>
           </div>
           <button class="icon-btn" id="closeDrawerBtn" title="Close Drawer">✕</button>
+        </div>
+
+        <div class="sidebar-datesheet-box">
+          <button class="sidebar-datesheet-btn" id="sidebarDatesheetBtn" title="CBSE Class 10 Datesheet & Live Countdown">
+            <div class="sidebar-datesheet-top">
+              <span class="datesheet-btn-pulse"></span>
+              <span class="sidebar-datesheet-title">📅 Exam Datesheet 2027</span>
+            </div>
+            <div class="sidebar-datesheet-sub" id="sidebarDatesheetSub">Loading countdown...</div>
+          </button>
         </div>
 
         <div class="sidebar-section">
@@ -1657,6 +2340,10 @@ def build():
         <span class="bottom-nav-icon" id="bottomNavThemeIcon">🌓</span>
         <span>Theme</span>
       </button>
+      <button class="bottom-nav-item" id="bottomNavDatesheet">
+        <span class="bottom-nav-icon">📅</span>
+        <span>Datesheet</span>
+      </button>
       <button class="bottom-nav-item" id="bottomNavTop">
         <span class="bottom-nav-icon">⬆️</span>
         <span>Top</span>
@@ -1751,6 +2438,185 @@ def build():
         <button class="btn btn-secondary" id="closeMapModalBtn">✕ Close</button>
       </div>
       <div class="map-content" id="mapContentArea"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CBSE DATESHEET & COUNTDOWN HUB MODAL
+       ============================================================ -->
+  <div class="datesheet-modal-backdrop" id="datesheetModal">
+    <div class="datesheet-modal">
+      <div class="datesheet-header">
+        <div class="datesheet-title-wrap">
+          <div class="datesheet-title-text">
+            <span>📅</span>
+            <span>CBSE Class 10 Board Exam Datesheet 2027</span>
+          </div>
+          <div class="datesheet-badge-live">
+            <span class="datesheet-pulse-dot"></span>
+            <span>Official Release • 101 Days Notice</span>
+          </div>
+        </div>
+
+        <div class="datesheet-header-actions">
+          <a href="https://www.cbse.gov.in/cbsenew/documents/Datesheet_ClassX%20_XII_2027_Main_06112026.pdf" target="_blank" class="btn btn-secondary" title="Download Official CBSE Datesheet PDF (4.48 MB)">
+            📥 Official PDF
+          </a>
+          <button class="btn btn-secondary" id="printDatesheetBtn" title="Print Clean Datesheet">
+            🖨️ Print
+          </button>
+          <button class="btn btn-primary" id="closeDatesheetModalBtn">✕ Close</button>
+        </div>
+      </div>
+
+      <div class="datesheet-content">
+        <!-- Live Countdown & Clock Hero -->
+        <div class="datesheet-hero">
+          <div class="hero-clock-box">
+            <div class="hero-label">
+              <span>🕒 Live Clock (IST)</span>
+            </div>
+            <div class="hero-clock-display" id="heroClockDisplay">--:--:-- --</div>
+            <div class="hero-exam-milestone" id="heroExamMilestone">
+              <span>🚀 Target: First Exam • Tue, 16 Feb 2027 (10:30 AM)</span>
+            </div>
+          </div>
+
+          <div class="hero-countdown-grid">
+            <div class="countdown-card">
+              <span class="countdown-val" id="cntDays">00</span>
+              <span class="countdown-unit">Days</span>
+            </div>
+            <div class="countdown-card">
+              <span class="countdown-val" id="cntHours">00</span>
+              <span class="countdown-unit">Hours</span>
+            </div>
+            <div class="countdown-card">
+              <span class="countdown-val" id="cntMins">00</span>
+              <span class="countdown-unit">Mins</span>
+            </div>
+            <div class="countdown-card">
+              <span class="countdown-val" id="cntSecs">00</span>
+              <span class="countdown-unit">Secs</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs inside Modal -->
+        <div class="datesheet-tabs-bar">
+          <button class="datesheet-tab-btn active" data-tab="major">
+            <span>⭐ Major 6 Subjects</span>
+          </button>
+          <button class="datesheet-tab-btn" data-tab="all">
+            <span>📋 All Class 10 Subjects (83)</span>
+          </button>
+          <button class="datesheet-tab-btn" data-tab="strategy">
+            <span>⚡ Gap Analysis & Strategy</span>
+          </button>
+          <button class="datesheet-tab-btn" data-tab="circulars">
+            <span>📢 Official Circulars & Rules</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Major Core Subjects -->
+        <div class="datesheet-pane active" id="paneMajor">
+          <div class="schedule-list" id="majorSubjectsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Tab 2: Full Class 10 Timetable -->
+        <div class="datesheet-pane" id="paneAll">
+          <div class="timetable-search-bar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="timetableSearchInput" placeholder="Filter by subject code (041, 086) or subject name..." />
+          </div>
+          <div class="timetable-table-wrap">
+            <table class="timetable-table">
+              <thead>
+                <tr>
+                  <th>Date & Day</th>
+                  <th>Time</th>
+                  <th>Code</th>
+                  <th>Subject Name</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="allSubjectsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 3: Gap Analysis & Revision Strategy -->
+        <div class="datesheet-pane" id="paneStrategy">
+          <div class="strategy-grid">
+            <div class="strategy-card">
+              <div class="strategy-card-title">
+                <span>🔥</span>
+                <span>The 4-Day Science Gap (Feb 18 - 21)</span>
+              </div>
+              <div class="strategy-card-body">
+                <strong>96 Hours of Pure Revision!</strong><br>
+                • <strong>Day 1 (Feb 18):</strong> Physics Electricity & Magnetic Effects numericals and ray diagrams.<br>
+                • <strong>Day 2 (Feb 19):</strong> Chemistry balancing, Carbon & its Compounds, Chemical Reactions.<br>
+                • <strong>Day 3 (Feb 20):</strong> Biology Life Processes, Reproduction & Heredity diagrams.<br>
+                • <strong>Day 4 (Feb 21):</strong> NCERT Exemplar MCQ practice & 2027 Sample Question Paper (SQP).
+              </div>
+            </div>
+
+            <div class="strategy-card">
+              <div class="strategy-card-title">
+                <span>🖋️</span>
+                <span>The 4-Day Hindi Gap (Feb 27 - Mar 2)</span>
+              </div>
+              <div class="strategy-card-body">
+                <strong>Full Polish for Course A (002) / B (085):</strong><br>
+                • <strong>Day 1:</strong> Vyakaran rules (Vachya, Pad Parichay, Vakya Bhed, Ras/Alankar).<br>
+                • <strong>Day 2:</strong> Kshitij prose and poetry chapter key concepts.<br>
+                • <strong>Day 3:</strong> Kritika supplementary reader chapters & character motivations.<br>
+                • <strong>Day 4:</strong> Anuched, Patra, Sandesh, and Vigyapan Lekhan practice for full marks.
+              </div>
+            </div>
+
+            <div class="strategy-card">
+              <div class="strategy-card-title">
+                <span>🌍</span>
+                <span>The 4-Day Social Science Sprint (Mar 4 - 7)</span>
+              </div>
+              <div class="strategy-card-body">
+                <strong>Grand Finale SST Master Plan:</strong><br>
+                • <strong>Day 1:</strong> History Nationalism in Europe & India events & timelines.<br>
+                • <strong>Day 2:</strong> Geography chapters + <strong>5-Marks Guaranteed Map Work</strong> (use our Map Guide!).<br>
+                • <strong>Day 3:</strong> Political Science key institutions and case-based questions.<br>
+                • <strong>Day 4:</strong> Economics key indicators & complete 3-hour mock board simulation.
+              </div>
+            </div>
+
+            <div class="strategy-card">
+              <div class="strategy-card-title">
+                <span>⏰</span>
+                <span>CBSE Official Exam Day Timings Checklist</span>
+              </div>
+              <div class="strategy-card-body">
+                • <strong>10:00 AM:</strong> Strict Centre Entry Gate Closure. No entry allowed after 10:00 AM.<br>
+                • <strong>10:15 AM:</strong> Question Paper distribution to students.<br>
+                • <strong>10:15 AM - 10:30 AM:</strong> 15-Minute Reading Period (Plan your questions, do NOT write answers).<br>
+                • <strong>10:30 AM:</strong> Answer booklet writing commences.<br>
+                • <strong>01:30 PM:</strong> 3-Hour examination concludes.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Official CBSE Circulars -->
+        <div class="datesheet-pane" id="paneCirculars">
+          <div class="circular-list" id="circularsList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1881,7 +2747,26 @@ def build():
         openMapWorkBtn: document.getElementById('openMapWorkBtn'),
         mapModal: document.getElementById('mapModal'),
         closeMapModalBtn: document.getElementById('closeMapModalBtn'),
-        mapContentArea: document.getElementById('mapContentArea')
+        mapContentArea: document.getElementById('mapContentArea'),
+
+        // Datesheet & Countdown Hub
+        openDatesheetBtn: document.getElementById('openDatesheetBtn'),
+        datesheetModal: document.getElementById('datesheetModal'),
+        closeDatesheetModalBtn: document.getElementById('closeDatesheetModalBtn'),
+        bottomNavDatesheet: document.getElementById('bottomNavDatesheet'),
+        sidebarDatesheetBtn: document.getElementById('sidebarDatesheetBtn'),
+        sidebarDatesheetSub: document.getElementById('sidebarDatesheetSub'),
+        printDatesheetBtn: document.getElementById('printDatesheetBtn'),
+        heroClockDisplay: document.getElementById('heroClockDisplay'),
+        heroExamMilestone: document.getElementById('heroExamMilestone'),
+        cntDays: document.getElementById('cntDays'),
+        cntHours: document.getElementById('cntHours'),
+        cntMins: document.getElementById('cntMins'),
+        cntSecs: document.getElementById('cntSecs'),
+        majorSubjectsList: document.getElementById('majorSubjectsList'),
+        allSubjectsTableBody: document.getElementById('allSubjectsTableBody'),
+        timetableSearchInput: document.getElementById('timetableSearchInput'),
+        circularsList: document.getElementById('circularsList')
       }};
 
       // ============================================================
@@ -1923,6 +2808,10 @@ def build():
 
         if (dom.mapModal.classList.contains('active')) {{
           params.set('map', '1');
+        }}
+
+        if (dom.datesheetModal && dom.datesheetModal.classList.contains('active')) {{
+          params.set('datesheet', '1');
         }}
 
         const qs = params.toString();
@@ -2076,6 +2965,10 @@ def build():
 
         if (urlParams.get('map') === '1' || localStorage.getItem('cbse_map_open') === 'true') {{
           openMapModal(false);
+        }}
+
+        if (urlParams.get('datesheet') === '1' || localStorage.getItem('cbse_datesheet_open') === 'true') {{
+          openDatesheetModal(false);
         }}
       }}
 
@@ -2743,6 +3636,7 @@ def build():
           if (dom.searchModal.classList.contains('active')) closeOmniSearch();
           if (dom.splitWorkbench.classList.contains('active')) closeWorkbench(true);
           if (dom.mapModal.classList.contains('active')) closeMapModal(true);
+          if (dom.datesheetModal && dom.datesheetModal.classList.contains('active')) closeDatesheetModal(true);
           closeDrawer();
         }}
       }});
@@ -2930,6 +3824,16 @@ def build():
         }} else {{
           if (dom.mapModal.classList.contains('active')) {{
             closeMapModal(false);
+          }}
+        }}
+
+        if (params.get('datesheet') === '1') {{
+          if (dom.datesheetModal && !dom.datesheetModal.classList.contains('active')) {{
+            openDatesheetModal(false);
+          }}
+        }} else {{
+          if (dom.datesheetModal && dom.datesheetModal.classList.contains('active')) {{
+            closeDatesheetModal(false);
           }}
         }}
       }}
