@@ -3596,6 +3596,33 @@ def build():
         dom.omniMatchCount.textContent = `${{matches.length}} matches`;
         dom.searchResultsList.innerHTML = '';
 
+        const isDatesheetQuery = query && (
+          query.includes('date') || query.includes('sheet') || query.includes('exam') ||
+          query.includes('time') || query.includes('count') || query.includes('sched') || query.includes('gap')
+        );
+
+        if (isDatesheetQuery) {{
+          const dateCard = document.createElement('div');
+          dateCard.className = 'search-result-item highlighted';
+          dateCard.style.background = 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(6,182,212,0.18))';
+          dateCard.style.borderColor = 'rgba(99,102,241,0.4)';
+          dateCard.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">📅</span>
+              <div>
+                <div style="color: #818cf8; font-weight: 700; font-size: 13px;">Open CBSE 2027 Datesheet & Exam Countdown Hub</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Live Clock • Gap Analysis • 6 Major Core Exams • 83 Subjects</div>
+              </div>
+            </div>
+            <span class="tag tag-year" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: rgba(16,185,129,0.4);">ENTER ↵</span>
+          `;
+          dateCard.addEventListener('click', () => {{
+            closeOmniSearch();
+            openDatesheetModal(true);
+          }});
+          dom.searchResultsList.appendChild(dateCard);
+        }}
+
         matches.forEach((m, idx) => {{
           const isDone = state.completedDocs.has(m.id);
           const item = document.createElement('div');
@@ -3718,6 +3745,549 @@ def build():
           closeMapModal(true);
         }}
       }});
+
+      // ============================================================
+      // DATESHEET, COUNTDOWN & OFFICIAL CIRCULARS CONTROLLER
+      // ============================================================
+      const CLASS_10_TIMETABLE = [
+        {{
+          date: '2027-02-16',
+          dateFormatted: '16 Feb 2027',
+          day: 'Tuesday',
+          time: '10:30 AM - 12:30 PM',
+          code: '049',
+          name: 'Painting',
+          category: 'Elective / Skill',
+          isMajor: false,
+          notes: 'Commencement of CBSE Class 10 Board Examinations 2027.'
+        }},
+        {{
+          date: '2027-02-17',
+          dateFormatted: '17 Feb 2027',
+          day: 'Wednesday',
+          time: '10:30 AM - 01:30 PM',
+          code: '041',
+          name: 'Mathematics (Standard)',
+          category: 'Core Main Subject',
+          subjectKey: 'Mathematics',
+          isMajor: true,
+          marks: '80 Theory + 20 Internal',
+          gapBadge: '🚀 1st Core Board Exam',
+          gapType: 'start',
+          gapDays: 0,
+          notes: 'Standard Mathematics (041). High priority: Master NCERT Theorems (Triangles, Circles), Trigonometric Identities, Coordinate Geometry & standard Sample Papers.'
+        }},
+        {{
+          date: '2027-02-18',
+          dateFormatted: '18 Feb 2027',
+          day: 'Thursday',
+          time: '10:30 AM - 12:30 PM',
+          code: '404 / 405 / 407 / 409 / 415 / 416 / 419',
+          name: 'Automotive, Fin. Markets, Beauty & Wellness, Food Production, Multimedia, Data Science',
+          category: 'Skill Subjects',
+          isMajor: false,
+          notes: '2-hour vocational skill examinations.'
+        }},
+        {{
+          date: '2027-02-19',
+          dateFormatted: '19 Feb 2027',
+          day: 'Friday',
+          time: '10:30 AM - 01:30 PM',
+          code: '064',
+          name: 'Home Science',
+          category: 'Elective',
+          isMajor: false,
+          notes: '3-hour examination.'
+        }},
+        {{
+          date: '2027-02-20',
+          dateFormatted: '20 Feb 2027',
+          day: 'Saturday',
+          time: '10:30 AM - 01:30 PM',
+          code: '154 / 303',
+          name: 'Elements of Business / Urdu Course-B',
+          category: 'Elective / Language',
+          isMajor: false,
+          notes: '3-hour examination.'
+        }},
+        {{
+          date: '2027-02-22',
+          dateFormatted: '22 Feb 2027',
+          day: 'Monday',
+          time: '10:30 AM - 01:30 PM',
+          code: '086',
+          name: 'Science',
+          category: 'Core Main Subject',
+          subjectKey: 'Science',
+          isMajor: true,
+          marks: '80 Theory + 20 Internal',
+          gapBadge: '🔥 4 FULL DAYS GAP (Feb 18 - 21) — 96 Hours Prep',
+          gapType: 'generous',
+          gapDays: 4,
+          notes: 'Generous 4-day prep window after Maths. Plan: Day 1 Physics numericals & Light ray diagrams, Day 2 Chemistry Carbon & Chemical Reactions, Day 3 Biology Life Processes & Heredity, Day 4 Exemplar & PYQs.'
+        }},
+        {{
+          date: '2027-02-23',
+          dateFormatted: '23 Feb 2027',
+          day: 'Tuesday',
+          time: '10:30 AM - 12:30 PM',
+          code: '406',
+          name: 'Introduction to Tourism',
+          category: 'Skill Subject',
+          isMajor: false,
+          notes: '2-hour examination.'
+        }},
+        {{
+          date: '2027-02-24',
+          dateFormatted: '24 Feb 2027',
+          day: 'Wednesday',
+          time: '10:30 AM - 12:30 PM',
+          code: '402',
+          name: 'Information Technology (402) / AI (417) / CA (165)',
+          category: 'Skill / Vocational',
+          subjectKey: 'Information Technology',
+          isMajor: true,
+          marks: '50 Theory + 50 Practical',
+          gapBadge: '⚡ 1 Day Gap (Feb 23)',
+          gapType: 'moderate',
+          gapDays: 1,
+          notes: 'Fast 1-day revision for IT 402: Part A Employability Skills (10 marks) & Part B Subject Specific Skills (40 marks - RDBMS SQL queries, LibreOffice Writer/Calc).'
+        }},
+        {{
+          date: '2027-02-25',
+          dateFormatted: '25 Feb 2027',
+          day: 'Thursday',
+          time: '10:30 AM - 12:30 PM',
+          code: '401 / 403 / 408 / 410-414 / 420-422',
+          name: 'Retail, Security, Agriculture, Banking, Marketing, Health Care, Apparel, Electronics, Design Thinking',
+          category: 'Skill Subjects',
+          isMajor: false,
+          notes: '2-hour skill examinations.'
+        }},
+        {{
+          date: '2027-02-26',
+          dateFormatted: '26 Feb 2027',
+          day: 'Friday',
+          time: '10:30 AM - 01:30 PM',
+          code: '184',
+          name: 'English (Language & Literature) / Communicative (101)',
+          category: 'Core Main Subject',
+          subjectKey: 'English',
+          isMajor: true,
+          marks: '80 Theory + 20 Internal',
+          gapBadge: '📚 1 Day Gap with IT (Feb 25) / 3 Days Gap without IT',
+          gapType: 'moderate',
+          gapDays: 1,
+          notes: 'Section A Reading Comprehension practice, Section B Formal Letter & Analytical Paragraph formats, Section C First Flight & Footprints key theme revision.'
+        }},
+        {{
+          date: '2027-02-27',
+          dateFormatted: '27 Feb 2027',
+          day: 'Saturday',
+          time: '10:30 AM - 01:30 PM',
+          code: '008 / 012-015 / 024 / 091',
+          name: 'Regional Languages (Sindhi, Malayalam, Odia, Assamese, Kannada, Nepali, Kokborok)',
+          category: 'Regional Languages',
+          isMajor: false,
+          notes: '3-hour language examinations.'
+        }},
+        {{
+          date: '2027-03-01',
+          dateFormatted: '01 Mar 2027',
+          day: 'Monday',
+          time: '10:30 AM - 01:30 PM',
+          code: '122 / 119 / 016',
+          name: 'Sanskrit / Sanskrit (Communicative) / Arabic',
+          category: 'Classical / Third Language',
+          isMajor: false,
+          notes: '3-hour examination.'
+        }},
+        {{
+          date: '2027-03-02',
+          dateFormatted: '02 Mar 2027',
+          day: 'Tuesday',
+          time: '10:30 AM - 12:30 PM',
+          code: '418',
+          name: 'Physical Activity Trainer',
+          category: 'Skill Subject',
+          isMajor: false,
+          notes: '2-hour skill examination.'
+        }},
+        {{
+          date: '2027-03-03',
+          dateFormatted: '03 Mar 2027',
+          day: 'Wednesday',
+          time: '10:30 AM - 01:30 PM',
+          code: '002',
+          name: 'Hindi Course-A / Hindi Course-B (085)',
+          category: 'Core Main Subject',
+          subjectKey: 'Hindi',
+          isMajor: true,
+          marks: '80 Theory + 20 Internal',
+          gapBadge: '🖋️ 4 FULL DAYS GAP (Feb 27 - Mar 2) (or 1 Day after Sanskrit on Mar 1)',
+          gapType: 'generous',
+          gapDays: 4,
+          notes: '4 full days of preparation! Focus on Vyakaran (Vachya, Pad Parichay, Vakya Bhed, Ras), Kshitij & Kritika chapter summaries, and creative writing.'
+        }},
+        {{
+          date: '2027-03-04',
+          dateFormatted: '04 Mar 2027',
+          day: 'Thursday',
+          time: '10:30 AM - 01:30 PM',
+          code: '003-006 / 009-011 / 089',
+          name: 'Urdu-A, Punjabi, Bengali, Tamil, Marathi, Gujarati, Manipuri, Telugu-Telangana',
+          category: 'Regional Languages',
+          isMajor: false,
+          notes: '3-hour language examinations.'
+        }},
+        {{
+          date: '2027-03-05',
+          dateFormatted: '05 Mar 2027',
+          day: 'Friday',
+          time: '10:30 AM - 01:30 PM',
+          code: '007 / 021-026 / 031-036',
+          name: 'Telugu, Russian, Persian, Limboo, Lepcha, Carnatic & Hindustani Music',
+          category: 'Languages & Music',
+          isMajor: false,
+          notes: '3-hour language / 2-hour music examinations.'
+        }},
+        {{
+          date: '2027-03-06',
+          dateFormatted: '06 Mar 2027',
+          day: 'Saturday',
+          time: '10:30 AM - 01:30 PM',
+          code: '018',
+          name: 'French',
+          category: 'Foreign Language',
+          isMajor: false,
+          notes: '3-hour examination.'
+        }},
+        {{
+          date: '2027-03-08',
+          dateFormatted: '08 Mar 2027',
+          day: 'Monday',
+          time: '10:30 AM - 01:30 PM',
+          code: '087',
+          name: 'Social Science',
+          category: 'Core Main Subject',
+          subjectKey: 'Social Science',
+          isMajor: true,
+          marks: '80 Theory + 20 Internal',
+          gapBadge: '🌍 4 FULL DAYS GAP (Mar 4 - 7) — 96 Hours Sprint',
+          gapType: 'generous',
+          gapDays: 4,
+          notes: 'Major 4-day revision block before the grand finale! Day 1: History (Europe & India), Day 2: Geography & Map Work (5 marks guaranteed via Map Guide), Day 3: Political Science, Day 4: Economics & full paper practice.'
+        }},
+        {{
+          date: '2027-03-09',
+          dateFormatted: '09 Mar 2027',
+          day: 'Tuesday',
+          time: '10:30 AM - 01:30 PM',
+          code: '017 / 020 / 076 / 088 / 092-099 / 136 / 254',
+          name: 'German, Tibetan, NCC, Spanish, Elements of Book Keeping & Accountancy',
+          category: 'Languages & Electives',
+          isMajor: false,
+          notes: 'Final concluding day of CBSE Class 10 Board Examinations 2027.'
+        }}
+      ];
+
+      const CBSE_CIRCULARS = [
+        {{
+          title: 'Official Datesheet for Class X & XII Board Examinations 2027',
+          date: '06/11/2026',
+          size: '4.48 MB',
+          url: 'https://www.cbse.gov.in/cbsenew/documents/Datesheet_ClassX%20_XII_2027_Main_06112026.pdf',
+          summary: 'Published 101 days in advance to facilitate academic planning. Class X exams commence on Tuesday, 16 Feb 2027 and conclude on 09 Mar 2027.'
+        }},
+        {{
+          title: 'Subject-wise Marks Bifurcation of Class X & XII Examinations 2026-27',
+          date: '06/11/2026',
+          size: '1.68 MB',
+          url: 'https://www.cbse.gov.in/cbsenew/documents/Circular_Marks_Bifurcation_06112026%20-.pdf',
+          summary: 'Detailed subject-by-subject distribution of Theory marks (80/50), Practical/Internal Assessment (20/50), and answer book sizes (32 or 40 pages). Class X requires 33% overall passing marks.'
+        }},
+        {{
+          title: 'Conduct of Practical Examination / Project Assessment (Winter Bound Schools)',
+          date: '05/11/2026',
+          size: '6.36 MB',
+          url: 'https://www.cbse.gov.in/cbsenew/documents/Circular_Practical_Examination_Winter_Bound_05112026.pdf',
+          summary: 'Standard operating procedures (SOP), external examiner guidelines, batch scheduling, and portal upload protocols for Class 10 internal assessments.'
+        }},
+        {{
+          title: 'Clarification on Totaling of Marks when Extra Questions are Attempted',
+          date: '04/06/2026',
+          size: '551 KB',
+          url: 'https://www.cbse.gov.in/cbsenew/documents/Circular_Total_04062026.pdf',
+          summary: 'Official rule confirming that if students attempt extra questions or internal choices, examiners evaluate all attempted questions and credit the highest-scoring combination.'
+        }},
+        {{
+          title: 'Correction of List of Candidates (LOC) Data 2026-27',
+          date: '02/11/2026',
+          size: '1.27 MB',
+          url: 'https://www.cbse.gov.in/cbsenew/documents/LOC_Correction_2026_27_02112026.pdf',
+          summary: 'Window for schools to verify candidate particulars, subject codes (e.g. Standard Mathematics vs Basic), and demographic details.'
+        }}
+      ];
+
+      function getSubjectCount(subjectKey) {{
+        return state.allMaterials.filter(m => m.subject === subjectKey).length;
+      }}
+
+      function renderMajorSubjects() {{
+        if (!dom.majorSubjectsList) return;
+        const majorItems = CLASS_10_TIMETABLE.filter(item => item.isMajor);
+        dom.majorSubjectsList.innerHTML = majorItems.map(item => {{
+          return `
+            <div class="schedule-card major-focus">
+              <div class="schedule-date-col">
+                <span class="sched-date">${{item.dateFormatted}}</span>
+                <span class="sched-day">${{item.day}}</span>
+                <span class="sched-time">${{item.time}}</span>
+              </div>
+
+              <div class="schedule-info-col">
+                <div class="sched-subject-title">
+                  <span>${{item.name}}</span>
+                  <span class="sched-code-badge">Code: ${{item.code}}</span>
+                  <span class="sched-marks-badge">${{item.marks}}</span>
+                </div>
+
+                <div class="sched-gap-row">
+                  <span class="gap-badge gap-${{item.gapType}}">${{item.gapBadge}}</span>
+                </div>
+
+                <div class="sched-notes">${{item.notes}}</div>
+              </div>
+
+              <div class="schedule-action-col">
+                ${{item.subjectKey ? `
+                  <button class="btn btn-primary" onclick="window.__jumpToSubject('${{item.subjectKey}}')" title="Filter catalog to ${{item.name}} materials">
+                    📚 View Papers (${{getSubjectCount(item.subjectKey)}})
+                  </button>
+                ` : ''}}
+              </div>
+            </div>
+          `;
+        }}).join('');
+      }}
+
+      function renderAllSubjectsTable(query = '') {{
+        if (!dom.allSubjectsTableBody) return;
+        const q = query.toLowerCase().trim();
+        const filtered = CLASS_10_TIMETABLE.filter(item => {{
+          if (!q) return true;
+          return item.name.toLowerCase().includes(q) ||
+                 item.code.toLowerCase().includes(q) ||
+                 item.dateFormatted.toLowerCase().includes(q) ||
+                 item.day.toLowerCase().includes(q);
+        }});
+
+        dom.allSubjectsTableBody.innerHTML = filtered.map(item => {{
+          const isMaj = item.isMajor;
+          return `
+            <tr class="${{isMaj ? 'major-row' : ''}}">
+              <td><strong>${{item.dateFormatted}}</strong><br><span style="font-size: 11px; color: var(--text-muted);">${{item.day}}</span></td>
+              <td style="font-family: var(--font-mono); font-size: 12px;">${{item.time}}</td>
+              <td><span class="sched-code-badge">${{item.code}}</span></td>
+              <td>
+                <span>${{item.name}}</span>
+                ${{isMaj ? '<span class="sched-marks-badge" style="margin-left: 6px;">Core</span>' : ''}}
+              </td>
+              <td>
+                ${{item.subjectKey ? `
+                  <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="window.__jumpToSubject('${{item.subjectKey}}')">
+                    View
+                  </button>
+                ` : '-'}}
+              </td>
+            </tr>
+          `;
+        }}).join('');
+      }}
+
+      function renderCirculars() {{
+        if (!dom.circularsList) return;
+        dom.circularsList.innerHTML = CBSE_CIRCULARS.map(c => {{
+          return `
+            <div class="circular-item">
+              <div class="circular-info">
+                <div class="circular-title">${{c.title}}</div>
+                <div class="circular-meta">
+                  <span>📅 Published: ${{c.date}}</span>
+                  <span>•</span>
+                  <span>📦 Size: ${{c.size}}</span>
+                </div>
+                <div class="circular-summary">${{c.summary}}</div>
+              </div>
+              <a href="${{c.url}}" target="_blank" class="btn btn-secondary" style="flex-shrink: 0;">
+                📥 Open PDF
+              </a>
+            </div>
+          `;
+        }}).join('');
+      }}
+
+      // Countdown & Clock Engine
+      const EXAM_COMMENCE_DATE = new Date('2027-02-16T10:30:00+05:30').getTime();
+      const MATH_EXAM_DATE = new Date('2027-02-17T10:30:00+05:30').getTime();
+
+      function updateDatesheetCountdown() {{
+        const now = new Date();
+
+        // Format Clock in IST
+        const options = {{
+          timeZone: 'Asia/Kolkata',
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        }};
+        if (dom.heroClockDisplay) {{
+          dom.heroClockDisplay.textContent = now.toLocaleString('en-IN', options);
+        }}
+
+        // Calculate time diff
+        let target = EXAM_COMMENCE_DATE;
+        let milestoneText = '🚀 Target: Exam Commencement • Tue, 16 Feb 2027 (10:30 AM)';
+
+        if (now.getTime() > EXAM_COMMENCE_DATE) {{
+          target = MATH_EXAM_DATE;
+          milestoneText = '📐 Target: Mathematics Standard (041) • Wed, 17 Feb 2027 (10:30 AM)';
+        }}
+
+        if (dom.heroExamMilestone) {{
+          dom.heroExamMilestone.innerHTML = `<span>${{milestoneText}}</span>`;
+        }}
+
+        const diff = target - now.getTime();
+
+        if (diff > 0) {{
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const mins = Math.floor((diff / (1000 * 60)) % 60);
+          const secs = Math.floor((diff / 1000) % 60);
+
+          if (dom.cntDays) dom.cntDays.textContent = String(days).padStart(2, '0');
+          if (dom.cntHours) dom.cntHours.textContent = String(hours).padStart(2, '0');
+          if (dom.cntMins) dom.cntMins.textContent = String(mins).padStart(2, '0');
+          if (dom.cntSecs) dom.cntSecs.textContent = String(secs).padStart(2, '0');
+
+          if (dom.sidebarDatesheetSub) {{
+            dom.sidebarDatesheetSub.textContent = `Starts in ${{days}}d ${{hours}}h`;
+          }}
+        }} else {{
+          if (dom.cntDays) dom.cntDays.textContent = '00';
+          if (dom.cntHours) dom.cntHours.textContent = '00';
+          if (dom.cntMins) dom.cntMins.textContent = '00';
+          if (dom.cntSecs) dom.cntSecs.textContent = '00';
+          if (dom.sidebarDatesheetSub) {{
+            dom.sidebarDatesheetSub.textContent = 'Exams underway';
+          }}
+        }}
+      }}
+
+      function openDatesheetModal(pushHistory = true) {{
+        renderMajorSubjects();
+        renderAllSubjectsTable();
+        renderCirculars();
+        updateDatesheetCountdown();
+
+        if (dom.datesheetModal) {{
+          dom.datesheetModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }}
+        localStorage.setItem('cbse_datesheet_open', 'true');
+        updateUrl(pushHistory);
+      }}
+
+      function closeDatesheetModal(updateHistory = true) {{
+        if (dom.datesheetModal) {{
+          dom.datesheetModal.classList.remove('active');
+          document.body.style.overflow = '';
+        }}
+        localStorage.setItem('cbse_datesheet_open', 'false');
+        if (updateHistory) {{
+          updateUrl(false);
+        }}
+      }}
+
+      window.__jumpToSubject = function(subjectName) {{
+        closeDatesheetModal(true);
+        document.querySelectorAll('.subject-pill').forEach(p => {{
+          if (p.getAttribute('data-subject') === subjectName) {{
+            p.classList.add('active');
+          }} else {{
+            p.classList.remove('active');
+          }}
+        }});
+        state.selectedSubject = subjectName;
+        localStorage.setItem('cbse_subject', state.selectedSubject);
+        updateUrl(true);
+        renderMaterials();
+        dom.stageScrollArea.scrollTo({{ top: 0, behavior: 'smooth' }});
+      }};
+
+      // Tab switcher inside Datesheet Modal
+      document.querySelectorAll('.datesheet-tab-btn').forEach(btn => {{
+        btn.addEventListener('click', () => {{
+          document.querySelectorAll('.datesheet-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const tab = btn.getAttribute('data-tab');
+
+          document.querySelectorAll('.datesheet-pane').forEach(p => p.classList.remove('active'));
+          if (tab === 'major') document.getElementById('paneMajor').classList.add('active');
+          if (tab === 'all') document.getElementById('paneAll').classList.add('active');
+          if (tab === 'strategy') document.getElementById('paneStrategy').classList.add('active');
+          if (tab === 'circulars') document.getElementById('paneCirculars').classList.add('active');
+        }});
+      }});
+
+      if (dom.timetableSearchInput) {{
+        dom.timetableSearchInput.addEventListener('input', (e) => {{
+          renderAllSubjectsTable(e.target.value);
+        }});
+      }}
+
+      if (dom.openDatesheetBtn) {{
+        dom.openDatesheetBtn.addEventListener('click', () => openDatesheetModal(true));
+      }}
+
+      if (dom.sidebarDatesheetBtn) {{
+        dom.sidebarDatesheetBtn.addEventListener('click', () => {{
+          closeDrawer();
+          openDatesheetModal(true);
+        }});
+      }}
+
+      if (dom.bottomNavDatesheet) {{
+        dom.bottomNavDatesheet.addEventListener('click', () => openDatesheetModal(true));
+      }}
+
+      if (dom.closeDatesheetModalBtn) {{
+        dom.closeDatesheetModalBtn.addEventListener('click', () => closeDatesheetModal(true));
+      }}
+
+      if (dom.printDatesheetBtn) {{
+        dom.printDatesheetBtn.addEventListener('click', () => {{
+          window.print();
+        }});
+      }}
+
+      if (dom.datesheetModal) {{
+        dom.datesheetModal.addEventListener('click', (e) => {{
+          if (e.target === dom.datesheetModal) {{
+            closeDatesheetModal(true);
+          }}
+        }});
+      }}
+
+      // Ticking Clock Timer every second
+      setInterval(updateDatesheetCountdown, 1000);
+      updateDatesheetCountdown();
 
       // Filter Handlers
       dom.subjectBar.addEventListener('click', (e) => {{
